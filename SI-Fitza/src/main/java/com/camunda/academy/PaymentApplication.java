@@ -4,6 +4,7 @@ import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.impl.oauth.OAuthCredentialsProvider;
 import io.camunda.zeebe.client.impl.oauth.OAuthCredentialsProviderBuilder;
 import io.camunda.zeebe.client.api.response.Topology;
+import java.net.URI;
 
 public class PaymentApplication {
 
@@ -24,8 +25,8 @@ public class PaymentApplication {
 
         // 2. Criar o Cliente Zeebe (A conexão real)
         try (final ZeebeClient client = ZeebeClient.newClientBuilder()
-                .grpcAddress(CAMUNDA_GRPC_ADDRESS)
-                .restAddress(CAMUNDA_REST_ADDRESS)
+                .grpcAddress(URI.create(CAMUNDA_GRPC_ADDRESS))
+                .restAddress(URI.create(CAMUNDA_REST_ADDRESS))
                 .credentialsProvider(credentialsProvider)
                 .build()) {
 
