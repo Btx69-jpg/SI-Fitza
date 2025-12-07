@@ -7,12 +7,13 @@ public class RawMaterialUsed {
     private RawMaterial rawMaterial;
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate expirationDate;
-    private int quantity;
+    private double quantity;
 
     public RawMaterialUsed() {}
 
-    public RawMaterialUsed(RawMaterial rawMaterial, int quantity) {
+    public RawMaterialUsed(RawMaterial rawMaterial, LocalDate expirationDate, double quantity) {
         this.rawMaterial = rawMaterial;
+        this.expirationDate = expirationDate;
         this.quantity = quantity;
     }
 
@@ -20,11 +21,9 @@ public class RawMaterialUsed {
         return rawMaterial;
     }
 
-    public int getQuantity() {
+    public double getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
+    public LocalDate getExpirationDate() { return expirationDate; }
 }

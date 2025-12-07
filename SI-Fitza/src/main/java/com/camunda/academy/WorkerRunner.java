@@ -1,6 +1,6 @@
 package com.camunda.academy;
 
-import com.camunda.handles.CreateLoteHandle;
+import com.camunda.handles.*;
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.Topology;
 import io.camunda.zeebe.client.impl.oauth.OAuthCredentialsProvider;
@@ -56,6 +56,41 @@ public class WorkerRunner {
                     .open();
 
             System.out.println(">>> JobWorker 'CreateLoteHandle' registado e ativo.");
+
+            client.newWorker()
+                    .jobType("updateMaterialLote")
+                    .handler(new UpdateMaterialLoteHandle())
+                    .name("updateMaterialWorker")
+                    .timeout(10000)
+                    .open();
+
+            System.out.println(">>> JobWorker 'UpdateMaterialLoteHandle' registado e ativo.");
+
+            client.newWorker()
+                    .jobType("recordMachineData")
+                    .handler(new RecordMachineDataHandle())
+                    .name("mesWorker")
+                    .timeout(10000)
+                    .open();
+
+            System.out.println(">>> JobWorker 'RecordMachineDataHandle' registado e ativo.");
+
+            client.newWorker()
+                    .jobType("recordAmbientSensorData")
+                    .handler(new RecordAmbientSensorDataHandle())
+                    .name("IOTWorker")
+                    .timeout(10000)
+                    .open();
+
+            System.out.println(">>> JobWorker 'RecordAmbientSensorDataHandle' registado e ativo.");
+
+            client.newWorker()
+                    .jobType("updateLoteProductionData")
+                    .handler(new UpdateLoteProductionDataHandle())
+                    .name("mergeWorker")
+                    .open();
+
+            System.out.println(">>> JobWorker 'UpdateLoteProductionDataHandle' registado e ativo.");
 
             System.out.println("\n [SISTEMA A CORRER] O worker está à espera de tarefas.");
             System.out.println(" Prime ENTER para parar a aplicação e sair...");

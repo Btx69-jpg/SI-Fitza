@@ -1,10 +1,8 @@
 package com.camunda.handles;
 
-import com.camunda.classes.RegistoLote.CleaningLine;
 import com.camunda.classes.RegistoLote.Cliente;
 import com.camunda.classes.RegistoLote.Enums.TypePizza;
 import com.camunda.classes.RegistoLote.Lote;
-import com.camunda.classes.RegistoLote.RawMaterialUsed;
 import io.camunda.zeebe.client.api.response.ActivatedJob;
 import io.camunda.zeebe.client.api.worker.JobClient;
 import io.camunda.zeebe.client.api.worker.JobHandler;
@@ -53,8 +51,8 @@ public class CreateLoteHandle implements JobHandler {
                     isOrder,
                     producedQuantity,
                     clienteObj,
-                    new RawMaterialUsed[0],
-                    new CleaningLine[0]
+                    null,
+                    null
             );
 
             Map<String, Object> outputVariables = new HashMap<>();

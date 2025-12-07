@@ -1,1 +1,142 @@
-{"executionPlatform":"Camunda Cloud","executionPlatformVersion":"8.8.0","exporter":{"name":"Camunda Web Modeler","version":"9c6a0f8"},"schemaVersion":19,"id":"Informacoes_Higiene","components":[{"label":"Linha","values":[{"label":"Linha Massa","value":"LinhaMassa"},{"label":"Linha Molho","value":"LinhaMolho"}],"type":"select","layout":{"row":"Row_17uvy1y","columns":null},"id":"Field_002bslg","key":"line","validate":{"required":true},"properties":{},"searchable":false},{"label":"Tipo de Limpeza","values":[{"label":"Fim de Lote","value":"END_OF_BATCH"},{"label":"Limpeza Profunda","value":"DEEP_CLEANING"}],"type":"select","layout":{"row":"Row_0do44nw","columns":null},"id":"Field_19zfgf1","key":"typeCleaning","validate":{"required":true}},{"label":"Linha isenta de produto","type":"checkbox","layout":{"row":"Row_0q3qqcr","columns":null},"id":"Field_1x7tj2s","key":"isLineClear","description":"A linha está totalmente isenta de produto anterior?","validate":{"required":true}},{"label":"Embalagens retiradas","type":"checkbox","layout":{"row":"Row_18xjro2","columns":null},"id":"Field_0cu6ytj","key":"isPackagingRemoved","description":"Todas as embalagens/rótulos antigos foram retirados?","validate":{"required":true}},{"label":"Lixos Esvaziados?","type":"checkbox","layout":{"row":"Row_1mhbjcw","columns":null},"id":"Field_1mgpqdp","key":"isWasteEmptied","validate":{"required":true},"description":"Os lixos do corredor da linha estão esvaziados"},{"label":"Esteira da linha Higienizada?","type":"checkbox","layout":{"row":"Row_13to8db","columns":null},"id":"Field_0i27235","key":"isConveyorSanitized","validate":{"required":true},"description":"A esteira da linha está devidamente higienizada"},{"label":"Observações","type":"textarea","layout":{"row":"Row_0hcddki","columns":null},"id":"Field_0a3h00y","key":"observations","validate":{"minLength":"","maxLength":"250"},"description":"Registe avarias ou anomalias detetadas, durante a limpeza"},{"label":"Limpeza Aprovada?","type":"checkbox","layout":{"row":"Row_0zcpgw4","columns":null},"id":"Field_0kewjql","key":"isCleaningApproved"}],"type":"default"}
+{
+  "components": [
+    {
+      "label": "Linha",
+      "values": [
+        {
+          "label": "Linha Massa",
+          "value": "LinhaMassa"
+        },
+        {
+          "label": "Linha Molho",
+          "value": "LinhaMolho"
+        }
+      ],
+      "type": "select",
+      "layout": {
+        "row": "Row_17uvy1y",
+        "columns": null
+      },
+      "id": "Field_002bslg",
+      "key": "line",
+      "validate": {
+        "required": true
+      },
+      "properties": {},
+      "searchable": false
+    },
+    {
+      "label": "Tipo de Limpeza",
+      "values": [
+        {
+          "label": "Fim de Lote",
+          "value": "END_OF_BATCH"
+        },
+        {
+          "label": "Limpeza Profunda",
+          "value": "DEEP_CLEANING"
+        }
+      ],
+      "type": "select",
+      "layout": {
+        "row": "Row_0do44nw",
+        "columns": null
+      },
+      "id": "Field_19zfgf1",
+      "key": "typeCleaning",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Linha isenta de produto",
+      "type": "checkbox",
+      "layout": {
+        "row": "Row_0q3qqcr",
+        "columns": null
+      },
+      "id": "Field_1x7tj2s",
+      "key": "isLineClear",
+      "description": "A linha está totalmente isenta de produto anterior?",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Embalagens retiradas",
+      "type": "checkbox",
+      "layout": {
+        "row": "Row_18xjro2",
+        "columns": null
+      },
+      "id": "Field_0cu6ytj",
+      "key": "isPackagingRemoved",
+      "description": "Todas as embalagens/rótulos antigos foram retirados?",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Lixos Esvaziados?",
+      "type": "checkbox",
+      "layout": {
+        "row": "Row_1mhbjcw",
+        "columns": null
+      },
+      "id": "Field_1mgpqdp",
+      "key": "isWasteEmptied",
+      "validate": {
+        "required": true
+      },
+      "description": "Os lixos do corredor da linha estão esvaziados"
+    },
+    {
+      "label": "Esteira da linha Higienizada?",
+      "type": "checkbox",
+      "layout": {
+        "row": "Row_13to8db",
+        "columns": null
+      },
+      "id": "Field_0i27235",
+      "key": "isConveyorSanitized",
+      "validate": {
+        "required": true
+      },
+      "description": "A esteira da linha está devidamente higienizada"
+    },
+    {
+      "label": "Observações",
+      "type": "textarea",
+      "layout": {
+        "row": "Row_0hcddki",
+        "columns": null
+      },
+      "id": "Field_0a3h00y",
+      "key": "observations",
+      "validate": {
+        "minLength": "",
+        "maxLength": "250"
+      },
+      "description": "Registe avarias ou anomalias detetadas, durante a limpeza"
+    },
+    {
+      "label": "Limpeza Aprovada?",
+      "type": "checkbox",
+      "layout": {
+        "row": "Row_0zcpgw4",
+        "columns": null
+      },
+      "id": "Field_0kewjql",
+      "key": "isCleaningApproved"
+    }
+  ],
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.8.0",
+  "exporter": {
+    "name": "Camunda Web Modeler",
+    "version": "9c6a0f8"
+  },
+  "schemaVersion": 17,
+  "id": "Informacoes_Higiene",
+  "type": "default"
+}
