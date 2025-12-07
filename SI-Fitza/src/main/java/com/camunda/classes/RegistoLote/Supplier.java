@@ -1,16 +1,21 @@
 package com.camunda.classes.RegistoLote;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Supplier {
-    public String id;
+    public String supplierId;
+    @JsonProperty("supplierName")
     public String name;
 
-    public Supplier(String id, String name) {
-        this.id = id;
+    public Supplier() {}
+
+    public Supplier(String supplierId, String name) {
+        this.supplierId = supplierId;
         this.name = name;
     }
 
-    public String getId() {
-        return id;
+    public String getSupplierId() {
+        return supplierId;
     }
 
     public String getName() {

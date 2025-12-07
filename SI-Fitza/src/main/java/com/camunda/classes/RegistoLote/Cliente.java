@@ -1,23 +1,28 @@
 package com.camunda.classes.RegistoLote;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Cliente {
-    private String idCliente;
-    private String nome;
+    private String clienteId;
+    @JsonProperty("clienteName")
+    private String name;
 
-    public Cliente(String idCliente, String nome) {
-        this.idCliente = idCliente;
-        this.nome = nome;
+    public Cliente() {}
+
+    public Cliente(String clienteId, String name) {
+        this.clienteId = clienteId;
+        this.name = name;
     }
 
-    public String getIdCliente() {
-        return idCliente;
+    public String getClienteId() {
+        return clienteId;
     }
 
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return name;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setName(String name) {
+        this.name = name;
     }
 }

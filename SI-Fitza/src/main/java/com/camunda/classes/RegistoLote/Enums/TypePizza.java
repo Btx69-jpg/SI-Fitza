@@ -1,4 +1,4 @@
-package com.camunda.classes.RegistoLote;
+package com.camunda.classes.RegistoLote.Enums;
 
 public enum TypePizza {
     FOUR_CHESSES,
