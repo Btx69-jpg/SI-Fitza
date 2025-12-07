@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Web Modeler" exporterVersion="9c6a0f8" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.6.0">
+  <bpmn:collaboration id="Collaboration_1p99xyu">
+    <bpmn:documentation>A produção abre o lote no ERP/MES.
+Que depois vai dar como resultado um ID do lote em estado Bloqueado</bpmn:documentation>
+    <bpmn:extensionElements>
+      <zeebe:properties />
+    </bpmn:extensionElements>
+    <bpmn:participant id="Participant_1s787yu" name="Registo de Dados Origem, Produção e Lote" processRef="LEI_SI2526_O_RegistoLote" />
+  </bpmn:collaboration>
+  <bpmn:message id="Message_1shbeim" name="Inicio producao">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=true" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:process id="LEI_SI2526_O_RegistoLote" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_0bd0rng">
+      <bpmn:lane id="gestor_producao" name="Gestor de Produção">
+        <bpmn:flowNodeRef>Armazenamneto_lote</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Atualizar_lote</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Registo_Lote_Task</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_0v0k2hz</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>evento-inicial</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Dados_materiasprimas</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>registo_materiasPrimas</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>upddate-dados-lote</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_0dpc9h6</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>regsisto_higienizacao_linha</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_1r3vg1y</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>envio-lote-dados</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>solicitacao-maquinas</bpmn:flowNodeRef>
+        <bpmn:childLaneSet id="LaneSet_1jlaxnx" />
+      </bpmn:lane>
+      <bpmn:lane id="controlo_qualidade" name="Líder Controlo de Qualidade">
+        <bpmn:flowNodeRef>lote-aprovado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_1g10agi</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>laboratorio-resposta</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>envio-amostras-lote</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>analise-dados-producao</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_04hsqsc</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>rececao-dados-lote</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>lote-desbloqueado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>lote-descartado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>descarte-lote</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>qrcode</bpmn:flowNodeRef>
+        <bpmn:childLaneSet id="LaneSet_1o3m2hr" />
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:receiveTask id="laboratorio-resposta" name="Aguardar resposta do laboratório" messageRef="Message_0mgjet4">
+      <bpmn:incoming>Flow_033ql61</bpmn:incoming>
+      <bpmn:outgoing>Flow_0euab17</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:manualTask id="analise-dados-producao" name="Análise dos dados de produção">
+      <bpmn:incoming>Flow_1uac8pr</bpmn:incoming>
+      <bpmn:outgoing>Flow_0jju5fd</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:serviceTask id="Armazenamneto_lote" name="Armazenameto do lote no sistema com o estado de bloqueado">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="armazenar_lote" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0e6ch72</bpmn:incoming>
+      <bpmn:outgoing>Flow_0kllczy</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Atualizar_lote" name="Atualiza lote no sistema com as matérias-primas">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="atualizar_lote" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1r3oxjm</bpmn:incoming>
+      <bpmn:outgoing>Flow_0k309zb</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="upddate-dados-lote" name="Atualização dos dados do lote">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="atualizar_dados_lote" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0ub1hld</bpmn:incoming>
+      <bpmn:outgoing>Flow_040ovfv</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Registo_Lote_Task" name="Criação do registo do lote">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="Form_Registo_Lote" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0e0hzv2</bpmn:incoming>
+      <bpmn:outgoing>Flow_0e6ch72</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOutputAssociation_09spequ">
+        <bpmn:targetRef>formulario_criacao_lote</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:userTask>
+    <bpmn:dataObject id="DataObject_0pzb1oy" />
+    <bpmn:dataObject id="DataObject_1au94k1" />
+    <bpmn:endEvent id="descarte-lote" name="Descarte do lote">
+      <bpmn:incoming>Flow_18hiz4g</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:manualTask id="envio-amostras-lote" name="Envio de amostras do lote para o laboratirio">
+      <bpmn:incoming>Flow_0brv97p</bpmn:incoming>
+      <bpmn:outgoing>Flow_033ql61</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:sendTask id="envio-lote-dados" name="Envio dos dados do lote">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="envio-dados-lote" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_040ovfv</bpmn:incoming>
+      <bpmn:outgoing>Flow_1wip5dp</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sequenceFlow id="Flow_033ql61" sourceRef="envio-amostras-lote" targetRef="laboratorio-resposta" />
+    <bpmn:sequenceFlow id="Flow_040ovfv" sourceRef="upddate-dados-lote" targetRef="envio-lote-dados" />
+    <bpmn:sequenceFlow id="Flow_0brv97p" sourceRef="Gateway_04hsqsc" targetRef="envio-amostras-lote" />
+    <bpmn:sequenceFlow id="Flow_0cox8kx" sourceRef="Gateway_1g10agi" targetRef="lote-aprovado" />
+    <bpmn:sequenceFlow id="Flow_0e0hzv2" sourceRef="evento-inicial" targetRef="Registo_Lote_Task" />
+    <bpmn:sequenceFlow id="Flow_0e6ch72" sourceRef="Registo_Lote_Task" targetRef="Armazenamneto_lote" />
+    <bpmn:sequenceFlow id="Flow_0euab17" sourceRef="laboratorio-resposta" targetRef="Gateway_1g10agi" />
+    <bpmn:sequenceFlow id="Flow_0jju5fd" sourceRef="analise-dados-producao" targetRef="Gateway_1g10agi" />
+    <bpmn:sequenceFlow id="Flow_0jt5qs1" sourceRef="lote-desbloqueado" targetRef="qrcode" />
+    <bpmn:sequenceFlow id="Flow_0k309zb" sourceRef="Atualizar_lote" targetRef="Gateway_0v0k2hz" />
+    <bpmn:sequenceFlow id="Flow_0kllczy" sourceRef="Armazenamneto_lote" targetRef="Dados_materiasprimas" />
+    <bpmn:sequenceFlow id="Flow_0ub1hld" sourceRef="Gateway_0dpc9h6" targetRef="upddate-dados-lote" />
+    <bpmn:sequenceFlow id="Flow_1047fpx" sourceRef="Dados_materiasprimas" targetRef="registo_materiasPrimas" />
+    <bpmn:sequenceFlow id="Flow_14cboo1" sourceRef="Gateway_0v0k2hz" targetRef="regsisto_higienizacao_linha" />
+    <bpmn:sequenceFlow id="Flow_18hiz4g" sourceRef="lote-descartado" targetRef="descarte-lote" />
+    <bpmn:sequenceFlow id="Flow_1g3ak2y" sourceRef="Gateway_0v0k2hz" targetRef="solicitacao-maquinas" />
+    <bpmn:sequenceFlow id="Flow_1qs53xb" sourceRef="solicitacao-maquinas" targetRef="Gateway_0dpc9h6" />
+    <bpmn:sequenceFlow id="Flow_1r3oxjm" sourceRef="registo_materiasPrimas" targetRef="Atualizar_lote" />
+    <bpmn:sequenceFlow id="Flow_1slexx1" sourceRef="Activity_1r3vg1y" targetRef="Gateway_0dpc9h6" />
+    <bpmn:sequenceFlow id="Flow_1uac8pr" sourceRef="Gateway_04hsqsc" targetRef="analise-dados-producao" />
+    <bpmn:sequenceFlow id="Flow_1usdohs" sourceRef="regsisto_higienizacao_linha" targetRef="Activity_1r3vg1y" />
+    <bpmn:sequenceFlow id="Flow_1wip5dp" sourceRef="envio-lote-dados" targetRef="rececao-dados-lote" />
+    <bpmn:sequenceFlow id="Flow_1wpwkb8" sourceRef="rececao-dados-lote" targetRef="Gateway_04hsqsc" />
+    <bpmn:dataObjectReference id="formulario_criacao_lote" name="Formulario de criação do lote" dataObjectRef="DataObject_1au94k1">
+      <bpmn:documentation>Contem o nome do produto final, quantidade, data e numero do lote</bpmn:documentation>
+      <bpmn:extensionElements />
+    </bpmn:dataObjectReference>
+    <bpmn:dataObjectReference id="formulario-materiasprimas" name="Formulário Materias Primas" dataObjectRef="DataObject_0pzb1oy">
+      <bpmn:documentation>quantidades, fornecedor, etc</bpmn:documentation>
+    </bpmn:dataObjectReference>
+    <bpmn:parallelGateway id="Gateway_04hsqsc">
+      <bpmn:incoming>Flow_1wpwkb8</bpmn:incoming>
+      <bpmn:outgoing>Flow_1uac8pr</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0brv97p</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:parallelGateway id="Gateway_0dpc9h6">
+      <bpmn:incoming>Flow_1qs53xb</bpmn:incoming>
+      <bpmn:incoming>Flow_1slexx1</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ub1hld</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:parallelGateway id="Gateway_0v0k2hz">
+      <bpmn:incoming>Flow_0k309zb</bpmn:incoming>
+      <bpmn:outgoing>Flow_1g3ak2y</bpmn:outgoing>
+      <bpmn:outgoing>Flow_14cboo1</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:parallelGateway id="Gateway_1g10agi">
+      <bpmn:incoming>Flow_0jju5fd</bpmn:incoming>
+      <bpmn:incoming>Flow_0euab17</bpmn:incoming>
+      <bpmn:outgoing>Flow_0cox8kx</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:endEvent id="qrcode" name="Geração QR Code do lote">
+      <bpmn:incoming>Flow_0jt5qs1</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:startEvent id="evento-inicial" name="Incio de criação do lote">
+      <bpmn:outgoing>Flow_0e0hzv2</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="lote-aprovado" name="Lote aprovado?">
+      <bpmn:incoming>Flow_0cox8kx</bpmn:incoming>
+      <bpmn:outgoing>Flow_0echq9d</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0h4ry2u</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="lote-descartado" name="Lote dado como descartado no sistema">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="lote_descartado" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0echq9d</bpmn:incoming>
+      <bpmn:outgoing>Flow_18hiz4g</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="lote-desbloqueado" name="Lote desbloqueado do sistema">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="lote_desbloqueado" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0h4ry2u</bpmn:incoming>
+      <bpmn:outgoing>Flow_0jt5qs1</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0echq9d" name="Não" sourceRef="lote-aprovado" targetRef="lote-descartado">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=aprovado = false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:receiveTask id="rececao-dados-lote" name="Receção dos dados do lote" messageRef="Message_3p4a3f0">
+      <bpmn:incoming>Flow_1wip5dp</bpmn:incoming>
+      <bpmn:outgoing>Flow_1wpwkb8</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:task id="Dados_materiasprimas" name="Recolher dados de origem das matérias-primas utilizadas">
+      <bpmn:incoming>Flow_0kllczy</bpmn:incoming>
+      <bpmn:outgoing>Flow_1047fpx</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:userTask id="regsisto_higienizacao_linha" name="Registo de Informações de Higiene">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="Informacoes_Higiene" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_14cboo1</bpmn:incoming>
+      <bpmn:outgoing>Flow_1usdohs</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="registo_materiasPrimas" name="Registo no sistema dos dados de origem das matérias-primas">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="Form_Materia_Prima" />
+        <zeebe:properties>
+          <zeebe:property />
+        </zeebe:properties>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1047fpx</bpmn:incoming>
+      <bpmn:outgoing>Flow_1r3oxjm</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOutputAssociation_0m04s3u">
+        <bpmn:targetRef>formulario-materiasprimas</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0h4ry2u" name="Sim" sourceRef="lote-aprovado" targetRef="lote-desbloqueado">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=aprovado = true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="solicitacao-maquinas" name="Solicitar Dados das maquinas utilizadas na produção">
+      <bpmn:documentation>Trocar isto para o MES enviar os dados de captura e alguma task solicitar</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="solicitar_dados" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1g3ak2y</bpmn:incoming>
+      <bpmn:outgoing>Flow_1qs53xb</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_1r3vg1y" name="Solicitar Dados de Temperatura Zona de Produção">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="solicitar_dados_producao" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1usdohs</bpmn:incoming>
+      <bpmn:outgoing>Flow_1slexx1</bpmn:outgoing>
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmn:message id="Message_3p4a3f0" name="rececao_dados_lote">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=lote_id" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:message id="Message_18iofu4" name="Message_18iofu4" />
+  <bpmn:message id="Message_0mgjet4" name="resposta-laboratorio">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=lote_id" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1p99xyu">
+      <bpmndi:BPMNShape id="BPMNShape_1cl90fd" bpmnElement="Participant_1s787yu" isHorizontal="true">
+        <dc:Bounds x="155" y="80" width="3205" height="730" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_09tnutg" bpmnElement="controlo_qualidade" isHorizontal="true">
+        <dc:Bounds x="185" y="80" width="3175" height="300" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1ee7gm3" bpmnElement="gestor_producao" isHorizontal="true">
+        <dc:Bounds x="185" y="380" width="3175" height="430" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ew7iua_di" bpmnElement="laboratorio-resposta">
+        <dc:Bounds x="2500" y="120" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1hls9zf_di" bpmnElement="analise-dados-producao">
+        <dc:Bounds x="2390" y="250" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ftz9rg_di" bpmnElement="Armazenamneto_lote">
+        <dc:Bounds x="495" y="530" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_13woprq" bpmnElement="Atualizar_lote">
+        <dc:Bounds x="1035" y="530" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0e167dz_di" bpmnElement="upddate-dados-lote">
+        <dc:Bounds x="1820" y="530" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_04tsow5" bpmnElement="Registo_Lote_Task">
+        <dc:Bounds x="335" y="530" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0g926pn_di" bpmnElement="descarte-lote">
+        <dc:Bounds x="3202" y="152" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3180" y="195" width="81" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0k69l5y_di" bpmnElement="envio-amostras-lote">
+        <dc:Bounds x="2300" y="120" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_19m8yni_di" bpmnElement="envio-lote-dados">
+        <dc:Bounds x="2020" y="530" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_10sg7se" bpmnElement="formulario_criacao_lote">
+        <dc:Bounds x="367" y="685" width="36" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="349" y="742" width="72" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1iv2swf" bpmnElement="formulario-materiasprimas">
+        <dc:Bounds x="877" y="685" width="36" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="856" y="742" width="80" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_04hsqsc_di" bpmnElement="Gateway_04hsqsc">
+        <dc:Bounds x="2205" y="265" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0gf5tzi" bpmnElement="Gateway_0dpc9h6">
+        <dc:Bounds x="1685" y="545" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0v0k2hz_di" bpmnElement="Gateway_0v0k2hz">
+        <dc:Bounds x="1230" y="545" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1g10agi_di" bpmnElement="Gateway_1g10agi">
+        <dc:Bounds x="2675" y="265" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0uozbul_di" bpmnElement="qrcode">
+        <dc:Bounds x="3202" y="272" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3189" y="315" width="63" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0jzkrfy" bpmnElement="evento-inicial">
+        <dc:Bounds x="247" y="552" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="226" y="596" width="78" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1l8x9xb_di" bpmnElement="lote-aprovado" isMarkerVisible="true">
+        <dc:Bounds x="2845" y="265" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2832" y="322" width="77" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1apfmhj_di" bpmnElement="lote-descartado">
+        <dc:Bounds x="3010" y="130" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0dtgh42_di" bpmnElement="lote-desbloqueado">
+        <dc:Bounds x="3010" y="250" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_028o9lo_di" bpmnElement="rececao-dados-lote">
+        <dc:Bounds x="2020" y="250" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1400bvd" bpmnElement="Dados_materiasprimas">
+        <dc:Bounds x="665" y="530" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1dwox9n" bpmnElement="regsisto_higienizacao_linha">
+        <dc:Bounds x="1340" y="530" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1ik9ncr" bpmnElement="registo_materiasPrimas">
+        <dc:Bounds x="845" y="530" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0h6vgg8_di" bpmnElement="solicitacao-maquinas">
+        <dc:Bounds x="1420" y="670" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1hg501i_di" bpmnElement="Activity_1r3vg1y">
+        <dc:Bounds x="1500" y="530" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_033ql61_di" bpmnElement="Flow_033ql61">
+        <di:waypoint x="2400" y="160" />
+        <di:waypoint x="2500" y="160" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_040ovfv_di" bpmnElement="Flow_040ovfv">
+        <di:waypoint x="1920" y="570" />
+        <di:waypoint x="2020" y="570" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0brv97p_di" bpmnElement="Flow_0brv97p">
+        <di:waypoint x="2230" y="265" />
+        <di:waypoint x="2230" y="160" />
+        <di:waypoint x="2300" y="160" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0cox8kx_di" bpmnElement="Flow_0cox8kx">
+        <di:waypoint x="2725" y="290" />
+        <di:waypoint x="2845" y="290" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_05ylzq1" bpmnElement="Flow_0e0hzv2">
+        <di:waypoint x="283" y="570" />
+        <di:waypoint x="335" y="570" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0e6ch72_di" bpmnElement="Flow_0e6ch72">
+        <di:waypoint x="435" y="570" />
+        <di:waypoint x="495" y="570" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0euab17_di" bpmnElement="Flow_0euab17">
+        <di:waypoint x="2600" y="160" />
+        <di:waypoint x="2700" y="160" />
+        <di:waypoint x="2700" y="265" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0jju5fd_di" bpmnElement="Flow_0jju5fd">
+        <di:waypoint x="2490" y="290" />
+        <di:waypoint x="2675" y="290" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0jt5qs1_di" bpmnElement="Flow_0jt5qs1">
+        <di:waypoint x="3110" y="290" />
+        <di:waypoint x="3202" y="290" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0k309zb_di" bpmnElement="Flow_0k309zb">
+        <di:waypoint x="1135" y="570" />
+        <di:waypoint x="1230" y="570" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0kllczy_di" bpmnElement="Flow_0kllczy">
+        <di:waypoint x="595" y="570" />
+        <di:waypoint x="665" y="570" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ub1hld_di" bpmnElement="Flow_0ub1hld">
+        <di:waypoint x="1735" y="570" />
+        <di:waypoint x="1820" y="570" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1047fpx_di" bpmnElement="Flow_1047fpx">
+        <di:waypoint x="765" y="570" />
+        <di:waypoint x="845" y="570" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_14cboo1_di" bpmnElement="Flow_14cboo1">
+        <di:waypoint x="1280" y="570" />
+        <di:waypoint x="1340" y="570" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18hiz4g_di" bpmnElement="Flow_18hiz4g">
+        <di:waypoint x="3110" y="170" />
+        <di:waypoint x="3202" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1g3ak2y_di" bpmnElement="Flow_1g3ak2y">
+        <di:waypoint x="1255" y="595" />
+        <di:waypoint x="1255" y="710" />
+        <di:waypoint x="1420" y="710" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1qs53xb_di" bpmnElement="Flow_1qs53xb">
+        <di:waypoint x="1520" y="710" />
+        <di:waypoint x="1710" y="710" />
+        <di:waypoint x="1710" y="595" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1r3oxjm_di" bpmnElement="Flow_1r3oxjm">
+        <di:waypoint x="945" y="570" />
+        <di:waypoint x="1035" y="570" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1slexx1_di" bpmnElement="Flow_1slexx1">
+        <di:waypoint x="1600" y="570" />
+        <di:waypoint x="1685" y="570" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1uac8pr_di" bpmnElement="Flow_1uac8pr">
+        <di:waypoint x="2255" y="290" />
+        <di:waypoint x="2390" y="290" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1usdohs_di" bpmnElement="Flow_1usdohs">
+        <di:waypoint x="1440" y="570" />
+        <di:waypoint x="1500" y="570" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1wip5dp_di" bpmnElement="Flow_1wip5dp">
+        <di:waypoint x="2070" y="530" />
+        <di:waypoint x="2070" y="330" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1wpwkb8_di" bpmnElement="Flow_1wpwkb8">
+        <di:waypoint x="2120" y="290" />
+        <di:waypoint x="2205" y="290" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0echq9d_di" bpmnElement="Flow_0echq9d">
+        <di:waypoint x="2870" y="265" />
+        <di:waypoint x="2870" y="170" />
+        <di:waypoint x="3010" y="170" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2839" y="216" width="21" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0h4ry2u_di" bpmnElement="Flow_0h4ry2u">
+        <di:waypoint x="2895" y="290" />
+        <di:waypoint x="3010" y="290" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2944" y="272" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_145y19i" bpmnElement="DataOutputAssociation_09spequ">
+        <di:waypoint x="386" y="610" />
+        <di:waypoint x="387" y="685" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOutputAssociation_0m04s3u_di" bpmnElement="DataOutputAssociation_0m04s3u">
+        <di:waypoint x="894" y="610" />
+        <di:waypoint x="893" y="685" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

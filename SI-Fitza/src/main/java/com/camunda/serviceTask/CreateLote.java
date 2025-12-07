@@ -1,3 +1,10 @@
 package com.camunda.serviceTask;
 
-public class CreateLote  {}
+@Component
+public class CreateLote  {
+
+    @ZeeWoerker(type = "armazenar_lote", autoComplete = true)
+    public void createLote() {
+
+    }
+}
