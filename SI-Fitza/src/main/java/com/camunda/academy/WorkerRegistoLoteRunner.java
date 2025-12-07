@@ -10,7 +10,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 import java.net.URI;
 import java.util.Scanner;
 
-public class WorkerRunner {
+public class WorkerRegistoLoteRunner {
     private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 
     private static String CAMUNDA_AUTHORIZATION_SERVER_URL = dotenv.get("CAMUNDA_AUTHORIZATION_SERVER_URL");
@@ -91,6 +91,14 @@ public class WorkerRunner {
                     .open();
 
             System.out.println(">>> JobWorker 'UpdateLoteProductionDataHandle' registado e ativo.");
+
+            client.newWorker()
+                    .jobType("sendLabEmail") // Define este nome no teu Send Task no BPMN
+                    .handler(new SendLabSampleEmailHandle())
+                    .name("sendLabEmailWorker")
+                    .open();
+
+            System.out.println(">>> JobWorker 'SendLabSampleEmailHandle' registado e ativo.");
 
             System.out.println("\n [SISTEMA A CORRER] O worker está à espera de tarefas.");
             System.out.println(" Prime ENTER para parar a aplicação e sair...");
