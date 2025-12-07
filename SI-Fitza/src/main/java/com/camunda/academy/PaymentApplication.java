@@ -4,16 +4,19 @@ import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.impl.oauth.OAuthCredentialsProvider;
 import io.camunda.zeebe.client.impl.oauth.OAuthCredentialsProviderBuilder;
 import io.camunda.zeebe.client.api.response.Topology;
+import io.github.cdimascio.dotenv.Dotenv;
+
 import java.net.URI;
 
 public class PaymentApplication {
+    private static final Dotenv dotenv = Dotenv.load();
 
-    private static String CAMUNDA_AUTHORIZATION_SERVER_URL = "https://login.cloud.camunda.io/oauth/token";
-    private static String CAMUNDA_TOKEN_AUDIENCE = "zeebe.camunda.io";
-    private static String CAMUNDA_REST_ADDRESS = "https://bru-2.zeebe.camunda.io/dfdb8d36-5bf6-4b20-be42-8205ce0805f0";
-    private static String CAMUNDA_GRPC_ADDRESS = "https://dfdb8d36-5bf6-4b20-be42-8205ce0805f0.bru-2.zeebe.camunda.io:443";
-    private static String CAMUNDA_CLIENT_ID = "zbk3brnZhoUZZAcTKONeV2o_55vZmy2s";
-    private static String CAMUNDA_CLIENT_SECRET = "aWg6XnQV0r7VsUGJP5cu7IMjaV0WFx5mCvbaWrS1z5dVNJfLWeXDST5aTVb93qea";
+    private static String CAMUNDA_AUTHORIZATION_SERVER_URL = dotenv.get("CAMUNDA_AUTHORIZATION_SERVER_URL");
+    private static String CAMUNDA_TOKEN_AUDIENCE = dotenv.get("CAMUNDA_TOKEN_AUDIENCE");
+    private static String CAMUNDA_REST_ADDRESS = dotenv.get("CAMUNDA_REST_ADDRESS");
+    private static String CAMUNDA_GRPC_ADDRESS = dotenv.get("CAMUNDA_GRPC_ADDRESS");
+    private static String CAMUNDA_CLIENT_ID = dotenv.get("CAMUNDA_CLIENT_ID");
+    private static String CAMUNDA_CLIENT_SECRET = dotenv.get("CAMUNDA_CLIENT_SECRET");
 
     public static void main(String[] args) {
         final OAuthCredentialsProvider credentialsProvider = new OAuthCredentialsProviderBuilder()
@@ -23,7 +26,6 @@ public class PaymentApplication {
                 .clientSecret(CAMUNDA_CLIENT_SECRET)
                 .build();
 
-        // 2. Criar o Cliente Zeebe (A conexão real)
         try (final ZeebeClient client = ZeebeClient.newClientBuilder()
                 .grpcAddress(URI.create(CAMUNDA_GRPC_ADDRESS))
                 .restAddress(URI.create(CAMUNDA_REST_ADDRESS))
@@ -32,15 +34,12 @@ public class PaymentApplication {
 
             System.out.println("A conectar ao Camunda 8...");
 
-            // 3. Testar a conexão pedindo a Topologia do cluster
             final Topology topology = client.newTopologyRequest().send().join();
 
             System.out.println("Conexão com sucesso!");
             System.out.println("Cluster topology: " + topology);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 }
