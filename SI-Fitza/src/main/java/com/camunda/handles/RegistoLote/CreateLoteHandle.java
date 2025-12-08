@@ -10,7 +10,36 @@ import io.camunda.zeebe.client.api.worker.JobHandler;
 
 import java.util.Map;
 
+/**
+ * Worker do Camunda/Zeebe responsável por **criar a instância inicial do objeto de domínio {@link Lote}**
+ * a partir das variáveis de processo.
+ * <p>
+ * Este Worker é tipicamente o primeiro a ser executado no processo de produção de um Lote.
+ * Ele deserializa os dados de entrada (ID, tipo de pizza, quantidade, etc.) e encapsula-os no objeto {@code Lote},
+ * preparando o contexto para as etapas subsequentes do processo.
+ * </p>
+ *
+ * <h3>Variáveis de Entrada Essenciais:</h3>
+ * <ul>
+ * <li>{@code loteId} (String): Identificador único do lote.</li>
+ * <li>{@code typePizza} (String): Tipo de produto (pizza) a ser produzido, correspondente ao Enum {@link TypePizza}.</li>
+ * <li>{@code producedQuantity} (Number): Quantidade de produto (float) a ser produzida.</li>
+ * <li>{@code isOrder} (Boolean): Indica se o Lote está a ser produzido sob encomenda.</li>
+ * </ul>
+ * <p>
+ * Se {@code isOrder} for verdadeiro, são lidas as variáveis {@code clienteId} e {@code clienteName} para construir o objeto {@link Cliente} associado.
+ * </p>
+ */
 public class CreateLoteHandle implements JobHandler {
+
+    /**
+     * Lógica de tratamento para o Job. Cria a instância do Lote e a insere de volta
+     * nas variáveis do processo sob a chave "lote".
+     *
+     * @param client O cliente do Job, usado para completar ou falhar o Job.
+     * @param job O Job ativado pelo motor Zeebe.
+     * @throws Exception Se ocorrer um erro durante a conversão de tipos ou a criação do Lote.
+     */
     @Override
     public void handle(JobClient client, ActivatedJob job) throws Exception {
         System.out.println(">>> WORKER INICIADO: A criar Lote...");
@@ -22,6 +51,7 @@ public class CreateLoteHandle implements JobHandler {
             String typePizzaStr = (String) variables.get("typePizza");
             TypePizza typePizza = null;
 
+            //Converter String para Enum TypePizza
             if (typePizzaStr != null) {
                 try {
                     typePizza = TypePizza.valueOf(typePizzaStr);
@@ -30,6 +60,7 @@ public class CreateLoteHandle implements JobHandler {
                 }
             }
 
+            //Converter Number para float
             Number qtyInput = (Number) variables.get("producedQuantity");
             float producedQuantity = (qtyInput != null) ? qtyInput.floatValue() : 0.0f;
 
@@ -54,14 +85,17 @@ public class CreateLoteHandle implements JobHandler {
                     clienteObj
             );
 
+            //Envolver o Lote para ser enviado de volta ao processo
             Map<String, Object> outputVariables = LoteUtils.wrapLoteVariable(novoLote);
 
+            //Limpar variáveis de entrada (opcional, mas recomendado para limpeza do contexto)
             outputVariables.put("typePizza", null);
             outputVariables.put("producedQuantity", null);
             outputVariables.put("isOrder", null);
             outputVariables.put("clienteId", null);
             outputVariables.put("clienteName", null);
 
+            //Completar o Job
             client.newCompleteCommand(job.getKey())
                     .variables(outputVariables)
                     .send()

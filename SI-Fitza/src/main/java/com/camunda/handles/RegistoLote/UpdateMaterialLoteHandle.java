@@ -13,8 +13,31 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Worker do Camunda/Zeebe responsável por **deserializar uma lista de materiais brutos**
+ * e anexá-los ao objeto {@link Lote} no contexto do processo.
+ * <p>
+ * Este Worker é projetado para lidar com a variável de processo {@code "listMaterials"},
+ * que se espera ser um array JSON de objetos contendo dados de materiais.
+ * </p>
+ *
+ * <h3>Passos de Execução:</h3>
+ * <ol>
+ * <li>Obtém a instância do {@link Lote} do contexto do processo usando {@link LoteUtils#getLoteFromJob(ActivatedJob)}.</li>
+ * <li>Recupera a variável {@code "listMaterials"} e converte-a para uma {@code List<Map<String, Object>>}.</li>
+ * <li>Irá iterar sobre cada mapa (material), mapeando os seus campos para as classes {@link Supplier}, {@link RawMaterial} e {@link RawMaterialUsed}.</li>
+ * <li>Adiciona cada {@link RawMaterialUsed} à lista de materiais do objeto {@code Lote}.</li>
+ * <li>Completa o Job, enviando o objeto {@code Lote} atualizado de volta para o processo e limpando as variáveis auxiliares ({@code "listMaterials"}, etc.).</li>
+ * </ol>
+ */
 public class UpdateMaterialLoteHandle implements JobHandler {
 
+    /**
+     * Lógica de tratamento para o Job.
+     *
+     * @param client O cliente do Job, usado para completar ou falhar o Job.
+     * @param job O Job ativado pelo motor Zeebe.
+     */
     @Override
     public void handle(final JobClient client, final ActivatedJob job) {
         try {
@@ -22,10 +45,10 @@ public class UpdateMaterialLoteHandle implements JobHandler {
 
             Map<String, Object> variables = job.getVariablesAsMap();
 
-            // 1. Obter o Lote Atual do processo
+            //Obter o Lote Atual do processo
             Lote lote = LoteUtils.getLoteFromJob(job);
 
-            // 2. Verificar se a lista existe (O nome tem de bater certo com o JSON: "listMaterials")
+            //Verificar se a lista existe (O nome tem de bater certo com o JSON: "listMaterials")
             if (variables.containsKey("listMaterials")) {
                 List<Map<String, Object>> rawList = LoteUtils.getMapper().convertValue(
                         variables.get("listMaterials"),
@@ -33,7 +56,7 @@ public class UpdateMaterialLoteHandle implements JobHandler {
                 );
 
                 if (rawList != null) {
-                    // 3. Iterar sobre cada material da lista
+                    //Iterar sobre cada material da lista
                     for (Map<String, Object> item : rawList) {
 
                         String rId = (String) item.getOrDefault("rawMaterialId", "N/A");
@@ -57,7 +80,8 @@ public class UpdateMaterialLoteHandle implements JobHandler {
                         RawMaterial rawMaterial = new RawMaterial(rId, rName, supplier);
                         RawMaterialUsed rawMaterialUsed = new RawMaterialUsed(rawMaterial, expirationDate, quantity);
 
-                        lote.getRawMaterialUsed().add(rawMaterialUsed);
+                        //Adiciona o material ao Lote
+                        lote.addMaterialUsed(rawMaterialUsed);
                         System.out.println("   + Material Adicionado: " + rName + " | Qtd: " + quantity);
                     }
                 }
@@ -65,12 +89,14 @@ public class UpdateMaterialLoteHandle implements JobHandler {
                 System.out.println(">>> AVISO: Variável 'listMaterials' não encontrada.");
             }
 
+            //Prepara o Lote para retorno e limpa variáveis
             Map<String, Object> outputVariables = LoteUtils.wrapLoteVariable(lote);
 
             outputVariables.put("listMaterials", null);
             outputVariables.put("rawMaterialId", null);
             outputVariables.put("materialName", null);
 
+            //Completa o Job
             client.newCompleteCommand(job.getKey())
                     .variables(outputVariables)
                     .send()
