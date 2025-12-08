@@ -1,6 +1,6 @@
 package com.camunda.handles.RegistoLote;
 
-import com.camunda.classes.RegistoLote.Cliente;
+import com.camunda.classes.Cliente;
 import com.camunda.classes.RegistoLote.Enums.TypePizza;
 import com.camunda.classes.RegistoLote.Lote;
 import io.camunda.zeebe.client.api.response.ActivatedJob;

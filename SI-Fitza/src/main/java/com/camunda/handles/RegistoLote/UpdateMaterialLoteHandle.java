@@ -1,8 +1,8 @@
 package com.camunda.handles.RegistoLote;
 
-import com.camunda.classes.RegistoLote.RawMaterial;
-import com.camunda.classes.RegistoLote.RawMaterialUsed;
-import com.camunda.classes.RegistoLote.Supplier;
+import com.camunda.classes.RawMaterial;
+import com.camunda.classes.RawMaterialUsed;
+import com.camunda.classes.Supplier;
 import io.camunda.zeebe.client.api.response.ActivatedJob;
 import io.camunda.zeebe.client.api.worker.JobClient;
 import io.camunda.zeebe.client.api.worker.JobHandler;

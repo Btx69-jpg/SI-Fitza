@@ -1,4 +1,4 @@
-package com.camunda.classes.RegistoLote;
+package com.camunda.classes;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;

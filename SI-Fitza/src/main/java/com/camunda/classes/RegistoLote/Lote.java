@@ -1,5 +1,7 @@
 package com.camunda.classes.RegistoLote;
 
+import com.camunda.classes.Cliente;
+import com.camunda.classes.RawMaterialUsed;
 import com.camunda.classes.RegistoLote.Enums.LoteState;
 import com.camunda.classes.RegistoLote.Enums.TypePizza;
 import com.camunda.classes.RegistoLote.machines.Machine;
