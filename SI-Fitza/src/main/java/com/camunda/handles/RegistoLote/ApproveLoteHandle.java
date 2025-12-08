@@ -18,6 +18,8 @@ public class ApproveLoteHandle implements JobHandler {
             lote.getLoteState().setState(LoteState.APROVED);
             lote.getLoteState().setDiscartReason(null);
 
+            LoteUtils.saveLoteToDisk(lote);
+
             client.newCompleteCommand(job.getKey())
                     .send()
                     .join();

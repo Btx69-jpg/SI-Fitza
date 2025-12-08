@@ -15,7 +15,6 @@
     <bpmn:laneSet id="LaneSet_0bd0rng">
       <bpmn:lane id="controlo_qualidade" name="Líder Controlo de Qualidade">
         <bpmn:flowNodeRef>Gateway_04hsqsc</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>laboratoryResponse</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_1g10agi</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>lote-aprovado</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>lote-descartado</bpmn:flowNodeRef>
@@ -24,6 +23,8 @@
         <bpmn:flowNodeRef>descarte-lote</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>sendLabEmail</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>analise-dados-producao</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>laboratoryResponse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>resultAnalysis</bpmn:flowNodeRef>
         <bpmn:childLaneSet id="LaneSet_1o3m2hr" />
       </bpmn:lane>
       <bpmn:lane id="gestor_producao" name="Gestor de Produção">
@@ -155,13 +156,9 @@
       <bpmn:outgoing>Flow_1uac8pr</bpmn:outgoing>
       <bpmn:outgoing>Flow_0brv97p</bpmn:outgoing>
     </bpmn:parallelGateway>
-    <bpmn:receiveTask id="laboratoryResponse" name="Aguardar resposta do laboratório" messageRef="Message_0mgjet4">
-      <bpmn:incoming>Flow_033ql61</bpmn:incoming>
-      <bpmn:outgoing>Flow_0euab17</bpmn:outgoing>
-    </bpmn:receiveTask>
     <bpmn:parallelGateway id="Gateway_1g10agi">
-      <bpmn:incoming>Flow_0euab17</bpmn:incoming>
-      <bpmn:incoming>Flow_1i5q5b5</bpmn:incoming>
+      <bpmn:incoming>Flow_1jr7ot9</bpmn:incoming>
+      <bpmn:incoming>Flow_1qmtzu4</bpmn:incoming>
       <bpmn:outgoing>Flow_0cox8kx</bpmn:outgoing>
     </bpmn:parallelGateway>
     <bpmn:exclusiveGateway id="lote-aprovado" name="Lote aprovado?">
@@ -194,7 +191,7 @@
         <zeebe:taskDefinition type="sendLabEmail" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0brv97p</bpmn:incoming>
-      <bpmn:outgoing>Flow_033ql61</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0q6uvdo</bpmn:outgoing>
     </bpmn:sendTask>
     <bpmn:sequenceFlow id="Flow_0e6ch72" sourceRef="Registo_Lote_Task" targetRef="createLote" />
     <bpmn:sequenceFlow id="Flow_0kllczy" sourceRef="createLote" targetRef="Dados_materiasprimas" />
@@ -212,22 +209,35 @@
     <bpmn:sequenceFlow id="Flow_1047fpx" sourceRef="Dados_materiasprimas" targetRef="registo_materiasPrimas" />
     <bpmn:sequenceFlow id="Flow_1uac8pr" sourceRef="Gateway_04hsqsc" targetRef="analise-dados-producao" />
     <bpmn:sequenceFlow id="Flow_0brv97p" sourceRef="Gateway_04hsqsc" targetRef="sendLabEmail" />
-    <bpmn:sequenceFlow id="Flow_033ql61" sourceRef="sendLabEmail" targetRef="laboratoryResponse" />
-    <bpmn:sequenceFlow id="Flow_0euab17" sourceRef="laboratoryResponse" targetRef="Gateway_1g10agi" />
     <bpmn:sequenceFlow id="Flow_0cox8kx" sourceRef="Gateway_1g10agi" targetRef="lote-aprovado" />
     <bpmn:sequenceFlow id="Flow_0echq9d" name="Não" sourceRef="lote-aprovado" targetRef="lote-descartado">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=labResult = false</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=labResult = false or aproveProduction = false</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0h4ry2u" name="Sim" sourceRef="lote-aprovado" targetRef="lote-desbloqueado">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=labResult </bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=labResult = true and aproveProduction = true</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_18hiz4g" sourceRef="lote-descartado" targetRef="descarte-lote" />
     <bpmn:sequenceFlow id="Flow_0jt5qs1" sourceRef="lote-desbloqueado" targetRef="qrcode" />
     <bpmn:manualTask id="analise-dados-producao" name="Análise dos dados de produção">
       <bpmn:incoming>Flow_1uac8pr</bpmn:incoming>
-      <bpmn:outgoing>Flow_1i5q5b5</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0gvm75f</bpmn:outgoing>
     </bpmn:manualTask>
-    <bpmn:sequenceFlow id="Flow_1i5q5b5" sourceRef="analise-dados-producao" targetRef="Gateway_1g10agi" />
+    <bpmn:receiveTask id="laboratoryResponse" name="Aguardar resposta do laboratorio" messageRef="Message_01b5b74">
+      <bpmn:incoming>Flow_0q6uvdo</bpmn:incoming>
+      <bpmn:outgoing>Flow_1jr7ot9</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:sequenceFlow id="Flow_0q6uvdo" sourceRef="sendLabEmail" targetRef="laboratoryResponse" />
+    <bpmn:sequenceFlow id="Flow_1jr7ot9" sourceRef="laboratoryResponse" targetRef="Gateway_1g10agi" />
+    <bpmn:sequenceFlow id="Flow_0gvm75f" sourceRef="analise-dados-producao" targetRef="resultAnalysis" />
+    <bpmn:sequenceFlow id="Flow_1qmtzu4" sourceRef="resultAnalysis" targetRef="Gateway_1g10agi" />
+    <bpmn:userTask id="resultAnalysis" name="Resultado da analise">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="ResultAnalysis" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0gvm75f</bpmn:incoming>
+      <bpmn:outgoing>Flow_1qmtzu4</bpmn:outgoing>
+    </bpmn:userTask>
   </bpmn:process>
   <bpmn:message id="Message_3p4a3f0" name="rececao_dados_lote">
     <bpmn:extensionElements>
@@ -236,6 +246,11 @@
   </bpmn:message>
   <bpmn:message id="Message_18iofu4" name="Message_18iofu4" />
   <bpmn:message id="Message_0mgjet4" name="laboratoryResponse">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=loteId" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:message id="Message_01b5b74" name="laboratoryResponse">
     <bpmn:extensionElements>
       <zeebe:subscription correlationKey="=loteId" />
     </bpmn:extensionElements>
@@ -334,10 +349,6 @@
       <bpmndi:BPMNShape id="Gateway_04hsqsc_di" bpmnElement="Gateway_04hsqsc">
         <dc:Bounds x="1969" y="150" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0ew7iua_di" bpmnElement="laboratoryResponse">
-        <dc:Bounds x="2334" y="25" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1g10agi_di" bpmnElement="Gateway_1g10agi">
         <dc:Bounds x="2489" y="150" width="50" height="50" />
       </bpmndi:BPMNShape>
@@ -370,6 +381,14 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1hls9zf_di" bpmnElement="analise-dados-producao">
         <dc:Bounds x="2094" y="225" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_10gua1p_di" bpmnElement="laboratoryResponse">
+        <dc:Bounds x="2310" y="25" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_04xcgzp_di" bpmnElement="resultAnalysis">
+        <dc:Bounds x="2310" y="225" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0e6ch72_di" bpmnElement="Flow_0e6ch72">
@@ -444,15 +463,6 @@
         <di:waypoint x="1994" y="65" />
         <di:waypoint x="2094" y="65" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_033ql61_di" bpmnElement="Flow_033ql61">
-        <di:waypoint x="2194" y="65" />
-        <di:waypoint x="2334" y="65" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0euab17_di" bpmnElement="Flow_0euab17">
-        <di:waypoint x="2434" y="65" />
-        <di:waypoint x="2514" y="65" />
-        <di:waypoint x="2514" y="150" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0cox8kx_di" bpmnElement="Flow_0cox8kx">
         <di:waypoint x="2539" y="175" />
         <di:waypoint x="2639" y="175" />
@@ -481,8 +491,21 @@
         <di:waypoint x="2894" y="265" />
         <di:waypoint x="3016" y="265" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1i5q5b5_di" bpmnElement="Flow_1i5q5b5">
+      <bpmndi:BPMNEdge id="Flow_0q6uvdo_di" bpmnElement="Flow_0q6uvdo">
+        <di:waypoint x="2194" y="65" />
+        <di:waypoint x="2310" y="65" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1jr7ot9_di" bpmnElement="Flow_1jr7ot9">
+        <di:waypoint x="2410" y="65" />
+        <di:waypoint x="2514" y="65" />
+        <di:waypoint x="2514" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0gvm75f_di" bpmnElement="Flow_0gvm75f">
         <di:waypoint x="2194" y="265" />
+        <di:waypoint x="2310" y="265" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1qmtzu4_di" bpmnElement="Flow_1qmtzu4">
+        <di:waypoint x="2410" y="265" />
         <di:waypoint x="2514" y="265" />
         <di:waypoint x="2514" y="200" />
       </bpmndi:BPMNEdge>

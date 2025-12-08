@@ -1,6 +1,7 @@
 package com.camunda.utils;
 
 import com.camunda.classes.RegistoLote.Lote;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -75,8 +76,14 @@ public class LoteUtils {
      * @return Um Map contendo a chave {@code "lote"} e o objeto serializável.
      */
     public static Map<String, Object> wrapLoteVariable(Lote lote) {
+        Map<String, Object> loteMap = objectMapper.convertValue(
+                lote,
+                new TypeReference<>() {}
+        );
+
         Map<String, Object> variables = new HashMap<>();
-        variables.put("lote", lote);
+        variables.put("lote", loteMap);
+
         return variables;
     }
 
@@ -103,7 +110,7 @@ public class LoteUtils {
                 if(criado) System.out.println(">>> Pasta 'lotes_gerados' criada com sucesso.");
             }
 
-            String filename = String.format("Lote_%s_%s.json", lote.getLoteId(), lote.getLoteState());
+            String filename = String.format("Lote_%s_%s.json", lote.getLoteId(), lote.getLoteState().getState());
             filename = filename.replaceAll("[/\\\\:*?\"<>|]", "_");
 
             File file = new File(directory, filename);

@@ -119,13 +119,28 @@ public class Lote {
         this.roomSensors.add(roomSensor);
     }
 
-    public String getLoteId() {
-        return loteId;
-    }
+    public String getLoteId() { return loteId; }
 
-    public StateLote getLoteState() { // Retorna StateLote, não LoteState
-        return loteState;
-    }
+    public StateLote getLoteState() { return loteState; }
+
+    public void setLoteState(StateLote loteState) { this.loteState = loteState; } // Setter também ajuda
+
+    public TypePizza getTypePizza() { return typePizza; }
+
+    public float getProducedQuantity() { return producedQuantity; }
+
+    @JsonProperty("order") // Importante manter a anotação no getter também se houver conflito
+    public boolean isOrder() { return isOrder; }
+
+    public Cliente getCliente() { return cliente; }
+
+    public List<Machine> getMachineReadings() { return machineReadings; }
+
+    public List<RoomSensor> getRoomSensors() { return roomSensors; }
+
+    public List<RawMaterialUsed> getRawMaterialUsed() { return rawMaterialUsed; }
+
+    public List<CleaningLine> getCleaningLine() { return cleaningLine; }
 
 
 }
