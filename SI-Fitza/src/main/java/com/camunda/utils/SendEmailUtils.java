@@ -48,6 +48,7 @@ public class SendEmailUtils {
         String port = dotenv.get("SMTP_PORT");
         String username = dotenv.get("SMTP_USER");
         String password = dotenv.get("SMTP_PASS");
+        String ccList = dotenv.get("EMAIL_CC_LIST");
 
         if (host == null || username == null) {
             throw new RuntimeException("Configurações de SMTP não encontradas no ficheiro .env");
@@ -72,6 +73,9 @@ public class SendEmailUtils {
         Message message = new MimeMessage(session);
         message.setFrom(new InternetAddress(username));
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipient));
+        if (ccList != null && !ccList.isEmpty()) {
+            message.setRecipients(Message.RecipientType.CC, InternetAddress.parse(ccList));
+        }
         message.setSubject(subject);
         message.setText(content);
 

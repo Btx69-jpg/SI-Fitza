@@ -1,4 +1,5 @@
 package com.camunda.handles.ProgramarProducao;
+import com.camunda.utils.SendEmailUtils;
 import io.camunda.zeebe.client.api.response.ActivatedJob;
 import io.camunda.zeebe.client.api.worker.JobClient;
 import io.camunda.zeebe.client.api.worker.JobHandler;
@@ -37,6 +38,7 @@ public class ContactMaintenanceEmailHandle implements JobHandler {
                     machineId, errorDetails
             );
 
+            SendEmailUtils.sendEmail(destinatario, assunto, corpo);
             System.out.println(">>> Email de manutenção enviado para: " + destinatario);
 
             client.newCompleteCommand(job.getKey())

@@ -5,6 +5,7 @@ import com.camunda.classes.ProgramarProducao.Order;
 import com.camunda.classes.ProgramarProducao.OrderDescription;
 import com.camunda.classes.RegistoLote.Enums.TypePizza;
 import com.camunda.utils.LoteUtils;
+import com.camunda.utils.OrdersUtils;
 import io.camunda.zeebe.client.api.response.ActivatedJob;
 import io.camunda.zeebe.client.api.worker.JobClient;
 import io.camunda.zeebe.client.api.worker.JobHandler;
@@ -24,13 +25,12 @@ public class RegisterOrderHandle implements JobHandler {
             Map<String, Object> variables = job.getVariablesAsMap();
 
             // 1. LER DADOS DO FORMULÁRIO
-            // IMPORTANTE: As 'Keys' no formulário do Camunda têm de ser iguais a estes nomes:
-            String cName = (String) variables.get("clientName");   // Key: clientName
-            String cEmail = (String) variables.get("clientEmail"); // Key: clientEmail
-            String pTypeStr = (String) variables.get("pizzaType"); // Key: pizzaType
+            String cName = (String) variables.get("clientName");
+            String cEmail = (String) variables.get("clientEmail");
+            String pTypeStr = (String) variables.get("pizzaType");
 
             // O Camunda pode enviar números como Integer ou Double
-            Number qtyNum = (Number) variables.get("quantity");    // Key: quantity
+            Number qtyNum = (Number) variables.get("quantity");
             int quantity = (qtyNum != null) ? qtyNum.intValue() : 1;
 
             // Validação de segurança (caso venha vazio)
@@ -41,7 +41,6 @@ public class RegisterOrderHandle implements JobHandler {
             }
 
             // 2. CRIAR OBJETOS JAVA
-            // Criar Cliente
             String clientId = "CLI-" + UUID.randomUUID().toString().substring(0, 5);
             Cliente cliente = new Cliente(clientId, cName);
             cliente.setMail(cEmail);
@@ -72,12 +71,12 @@ public class RegisterOrderHandle implements JobHandler {
             System.out.println("   > Cliente: " + cName);
             System.out.println("   > Pedido: " + quantity + "x " + typePizza);
 
+            OrdersUtils.saveOrderToDisk(order);
             // 3. PREPARAR SAÍDA
             Map<String, Object> output = new HashMap<>();
 
             // Guardamos o objeto completo em 'orderData' para as próximas tarefas usarem
             output.put("orderData", order);
-            // Enviamos também o ID solto
             output.put("orderId", orderId);
 
             client.newCompleteCommand(job.getKey())
@@ -86,7 +85,6 @@ public class RegisterOrderHandle implements JobHandler {
                     .join();
 
             System.out.println(">>> Encomenda registada com sucesso.");
-
         } catch (Exception e) {
             e.printStackTrace();
             client.newFailCommand(job.getKey())
