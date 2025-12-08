@@ -1,19 +1,11 @@
 package com.camunda.handles.ProgramarProducao;
 
-import com.camunda.classes.ProgramarProducao.MaterialNeeded;
 import com.camunda.classes.ProgramarProducao.Order;
-import com.camunda.classes.ProgramarProducao.OrderDescription;
-import com.camunda.classes.ProgramarProducao.ProductTechnicalSheet;
-import com.camunda.classes.RawMaterial;
-import com.camunda.classes.RegistoLote.Enums.TypePizza;
 import com.camunda.utils.LoteUtils;
 import io.camunda.zeebe.client.api.response.ActivatedJob;
 import io.camunda.zeebe.client.api.worker.JobClient;
 import io.camunda.zeebe.client.api.worker.JobHandler;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class GetProductOrderDetailsHandle implements JobHandler {
@@ -32,46 +24,16 @@ public class GetProductOrderDetailsHandle implements JobHandler {
 
             Order order = LoteUtils.getMapper().convertValue(variables.get("orderData"), Order.class);
 
-            System.out.println("   > ID Encomenda: " + order.getOrderId());
+            System.out.println("   > ID Encomenda Recebida: " + order.getOrderId());
             System.out.println("   > Cliente: " + order.getClientData().getName());
+            System.out.println("   > Quantidade de Itens: " + order.getOrderDescription().length);
 
-            // 2. Calcular Materiais Necessários (Simulação de Ficha Técnica)
-            List<MaterialNeeded> totalMaterialsNeeded = new ArrayList<>();
-
-            for (OrderDescription item : order.getOrderDescription()) {
-                TypePizza type = item.getTypePizza();
-                int qtdPizzas = item.getQuantity();
-
-                System.out.println("   > Item: " + type + " | Qtd: " + qtdPizzas);
-
-                // Obter a ficha técnica (Mock)
-                ProductTechnicalSheet sheet = getMockTechnicalSheet(type);
-
-                // Calcular totais para este item e adicionar à lista
-                for (MaterialNeeded mat : sheet.getMaterialNeeded()) {
-                    double totalQty = mat.getQuantity() * qtdPizzas;
-
-                    // Nota: Numa app real, devíamos agrupar materiais repetidos (ex: somar farinha de várias pizzas)
-                    // Aqui simplificamos criando uma entrada nova para cada necessidade.
-                    RawMaterial rm = mat.getRawMaterial();
-                    MaterialNeeded needed = new MaterialNeeded(rm, (int) Math.ceil(totalQty));
-
-                    totalMaterialsNeeded.add(needed);
-                }
-            }
-
-            System.out.println("   > Total de materiais calculados: " + totalMaterialsNeeded.size() + " itens.");
-
-            // 3. Enviar a lista de materiais para o processo
-            Map<String, Object> outputVariables = new HashMap<>();
-            outputVariables.put("materialsNeededList", totalMaterialsNeeded);
 
             client.newCompleteCommand(job.getKey())
-                    .variables(outputVariables)
                     .send()
                     .join();
 
-            System.out.println(">>> Detalhes da encomenda processados.");
+            System.out.println(">>> Detalhes da encomenda validados com sucesso.");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -82,5 +44,4 @@ public class GetProductOrderDetailsHandle implements JobHandler {
                     .join();
         }
     }
-
 }
