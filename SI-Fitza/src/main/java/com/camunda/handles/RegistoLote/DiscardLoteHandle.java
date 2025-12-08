@@ -47,12 +47,21 @@ public class DiscardLoteHandle implements JobHandler {
             Map<String, Object> variables = job.getVariablesAsMap();
 
             //Obter o motivo do descarte
-            String reasonMsg = (String) variables.getOrDefault("rejectionReason", "Motivo não especificado");
+            String labReason = (String) variables.get("rejectionReason");
+            String qcReason = (String) variables.get("rejectionControlReason");
+
+            Lote lote = LoteUtils.getLoteFromJob(job);
+            StateLote novoEstado = new StateLote(LoteState.DISCARDED);
 
             //Obter o Lote e criar novos objetos de estado
-            Lote lote = LoteUtils.getLoteFromJob(job);
-            DiscartReason motivoObjeto = new DiscartReason(reasonMsg, ActorDiscartLote.LABORATORY);
-            StateLote novoEstado = new StateLote(motivoObjeto, LoteState.DISCARDED);
+            if (labReason != null && !labReason.isEmpty()) {
+                novoEstado.addDiscartReason(new DiscartReason(labReason, ActorDiscartLote.LABORATORY));
+            }
+
+            if (qcReason != null && !qcReason.isEmpty()) {
+                novoEstado.addDiscartReason(new DiscartReason(qcReason, ActorDiscartLote.QUALITY_CONTROL));
+            }
+
 
             //Atualizar o estado do Lote e persistir
             lote.setLoteState(novoEstado);

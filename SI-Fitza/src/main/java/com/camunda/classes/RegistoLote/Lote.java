@@ -87,7 +87,7 @@ public class Lote {
      */
     public Lote(String loteId, TypePizza typePizza, boolean isOrder, float producedQuantity, Cliente cliente) {
         this.loteId = loteId;
-        this.loteState = new StateLote(null, LoteState.BLOCKED);
+        this.loteState = new StateLote(LoteState.BLOCKED);
         this.typePizza = typePizza;
         this.isOrder = isOrder;
         this.producedQuantity = producedQuantity;

@@ -42,7 +42,7 @@ public class ApproveLoteHandle implements JobHandler {
 
             //Obter o Lote principal do contexto e atualizar o estado
             Lote lote = LoteUtils.getLoteFromJob(job);
-            StateLote novoEstado = new StateLote(null, LoteState.APROVED);
+            StateLote novoEstado = new StateLote(LoteState.APROVED);
 
             lote.setLoteState(novoEstado);
             LoteUtils.saveLoteToDisk(lote);
