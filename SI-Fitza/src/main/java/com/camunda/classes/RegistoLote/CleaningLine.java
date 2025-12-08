@@ -30,8 +30,7 @@ public class CleaningLine {
     public CleaningLine(ProductionLine line, TypeCleaning typeCleaning,
                         boolean isLineClear, boolean isPackagingRemoved,
                         boolean isWasteEmptied, boolean isConveyorSanitized,
-                        @Nullable String observations,
-                        boolean isCleaningApproved) {
+                        @Nullable String observations, boolean isCleaningApproved) {
         this.line = line;
         this.typeCleaning = typeCleaning;
         this.isLineClear = isLineClear;

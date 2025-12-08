@@ -35,7 +35,6 @@ public class UpdateLoteProductionDataHandle implements JobHandler {
                 }
             }
 
-
             if (variables.containsKey("temp_sensors_list")) {
                 List<RoomSensor> newSensors = LoteUtils.getMapper().convertValue(
                         variables.get("temp_sensors_list"),
