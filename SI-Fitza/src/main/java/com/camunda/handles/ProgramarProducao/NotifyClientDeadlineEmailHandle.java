@@ -7,8 +7,34 @@ import io.camunda.zeebe.client.api.worker.JobHandler;
 
 import java.util.Map;
 
+/**
+ * {@code NotifyClientDeadlineEmailHandle} é um {@link io.camunda.zeebe.client.api.worker.JobHandler}
+ * responsável por **enviar um e-mail de notificação ao cliente** informando-o
+ * sobre o prazo de entrega estimado ({@code deliveryDate}) da sua encomenda.
+ *
+ * <p>Esta classe tenta extrair os dados do cliente (nome e e-mail) mapeados diretamente
+ * nas variáveis do Job ou, em alternativa, navegando dentro do objeto {@code orderData}.
+ *
+ * <p>Utiliza a utilidade {@link SendEmailUtils} para simular o envio de e-mail.
+ */
 public class NotifyClientDeadlineEmailHandle implements JobHandler {
 
+    /**
+     * Trata a tarefa (Job) ativada do Camunda Zeebe.
+     *
+     * <p>O fluxo de trabalho é:
+     * <ol>
+     * <li>Obter variáveis necessárias: {@code clientName}, {@code clientEmail}, {@code deliveryDate} e {@code orderId}.</li>
+     * <li>Implementar lógica de fallback para extrair dados do cliente a partir do objeto {@code orderData}
+     * caso não estejam mapeados diretamente no Job.</li>
+     * <li>Montar o assunto e o corpo do e-mail com os dados da encomenda e o prazo de entrega.</li>
+     * <li>Chamar {@link SendEmailUtils#sendEmail(String, String, String)} para simular o envio.</li>
+     * <li>Completar a tarefa.</li>
+     * </ol>
+     *
+     * @param client O cliente do Job para enviar comandos de conclusão ({@code complete}) ou falha ({@code fail}).
+     * @param job O Job ativado que contém os detalhes da tarefa e variáveis de entrada.
+     */
     @Override
     public void handle(JobClient client, ActivatedJob job) {
         System.out.println("\n>>> [EMAIL] A notificar cliente sobre prazo de entrega...");
@@ -16,11 +42,9 @@ public class NotifyClientDeadlineEmailHandle implements JobHandler {
         try {
             Map<String, Object> variables = job.getVariablesAsMap();
 
-            //Tentar obter dados diretos (se você fez Input Mapping no BPMN)
             String clientName = (String) variables.get("clientName");
             String clientEmail = (String) variables.get("clientEmail");
 
-            // Se não vieram mapeados, tentar extrair do objeto 'orderData'
             if (clientEmail == null || clientName == null) {
                 Map<String, Object> orderData = (Map<String, Object>) variables.get("orderData");
                 if (orderData != null) {
@@ -32,11 +56,10 @@ public class NotifyClientDeadlineEmailHandle implements JobHandler {
                 }
             }
 
-            // Obter a Data de Entrega ( criada anteriormente no processo)
             String deliveryDate = (String) variables.getOrDefault("deliveryDate", "A definir");
             String orderId = (String) variables.getOrDefault("orderId", (String) variables.getOrDefault("correlationKey", "N/A"));
 
-            // 4. Montar o Email
+            //Montar o Email
             String assunto = "Previsão de Entrega - Pedido " + orderId;
 
             String corpo = String.format(

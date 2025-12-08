@@ -14,8 +14,35 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * {@code GetProductOrderDetailsHandle} é um {@link io.camunda.zeebe.client.api.worker.JobHandler}
+ * responsável por **receber dados brutos** de uma fonte (como um Formulário Camunda Tasklist
+ * ou variáveis soltas de uma mensagem) e **converter/estruturar esses dados**
+ * nos objetos Java de negócio esperados ({@link Cliente}, {@link OrderDescription},
+ * e o objeto principal {@link Order}).
+ *
+ * <p>Esta é tipicamente a primeira tarefa de serviço após a receção de um pedido
+ * via formulário de utilizador ou receção de mensagem.
+ *
+ * <p>A principal variável de saída é {@code orderData} (objeto {@link Order} serializado).
+ */
 public class GetProductOrderDetailsHandle implements JobHandler {
 
+    /**
+     * Trata a tarefa (Job) ativada do Camunda Zeebe.
+     *
+     * <p>O fluxo de trabalho principal é:
+     * <ol>
+     * <li>Obter variáveis soltas ({@code clientName}, {@code pizzaType}, {@code quantity}, etc.) do {@code ActivatedJob}.</li>
+     * <li>Realizar validações básicas e conversões (ex: String para {@code TypePizza}, Number para int).</li>
+     * <li>Criar instâncias dos objetos de negócio ({@link Cliente}, {@link OrderDescription}, {@link Order}), gerando IDs únicos.</li>
+     * <li>Serializar o objeto {@code Order} completo e enviá-lo de volta ao processo como a variável {@code orderData}.</li>
+     * </ol>
+     *
+     * @param client O cliente do Job para enviar comandos de conclusão ({@code complete}) ou falha ({@code fail}).
+     * @param job O Job ativado que contém os detalhes da tarefa e variáveis de entrada.
+     * @throws Exception Se ocorrer um erro durante o processamento.
+     */
     @Override
     public void handle(JobClient client, ActivatedJob job) throws Exception {
         System.out.println("\n>>> [TASK: REGISTO ENCOMENDA] A processar dados do formulário...");
@@ -23,13 +50,11 @@ public class GetProductOrderDetailsHandle implements JobHandler {
         try {
             Map<String, Object> variables = job.getVariablesAsMap();
 
-            // 1. Ler as variáveis INDIVIDUAIS que vêm do Formulário
-            // Nota: Os nomes aqui ("clientName", "pizzaType"...) têm de ser iguais aos 'Keys' do formulário
+            //Ler as variáveis INDIVIDUAIS que vêm do Formulário
             String cName = (String) variables.get("clientName");
             String cEmail = (String) variables.get("clientEmail");
             String pTypeStr = (String) variables.get("pizzaType");
 
-            // O Camunda pode enviar números como Integer ou Double, por isso usamos Number para ser seguro
             Number qtyNum = (Number) variables.get("quantity");
             int quantity = (qtyNum != null) ? qtyNum.intValue() : 1;
 
@@ -40,8 +65,7 @@ public class GetProductOrderDetailsHandle implements JobHandler {
                 pTypeStr = (pTypeStr == null) ? "PEPPERONI" : pTypeStr;
             }
 
-            // 2. Criar os Objetos Java
-            // Criar Cliente
+            //Criar os Objetos Java
             String clientId = "CLI-" + UUID.randomUUID().toString().substring(0, 5);
             Cliente cliente = new Cliente(clientId, cName);
             cliente.setMail(cEmail);
@@ -58,7 +82,7 @@ public class GetProductOrderDetailsHandle implements JobHandler {
             // Criar a descrição do item
             OrderDescription item = new OrderDescription(typePizza, quantity);
 
-            // Criar a Encomenda (Order) completa
+            //Criar a Encomenda (Order) completa
             String orderId = "ORD-" + UUID.randomUUID().toString().substring(0, 8);
             Order order = new Order(
                     orderId,
@@ -72,17 +96,12 @@ public class GetProductOrderDetailsHandle implements JobHandler {
             System.out.println("   > Cliente: " + cName + " (" + cEmail + ")");
             System.out.println("   > Pedido: " + quantity + "x " + typePizza);
 
-            // 3. Preparar as variáveis de saída
+            //Preparar as variáveis de saída
             Map<String, Object> output = new HashMap<>();
 
-            // AQUI ESTÁ O TRUQUE: Guardamos o objeto 'order' na variável 'orderData'
-            // Assim, o resto dos workers (que esperam 'orderData') vão funcionar sem problemas.
             output.put("orderData", order);
-
-            // Também enviamos o ID solto, dá jeito para emails e pesquisas
             output.put("orderId", orderId);
 
-            // 4. Completar a tarefa
             client.newCompleteCommand(job.getKey())
                     .variables(output)
                     .send()

@@ -8,16 +8,45 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 import java.util.Map;
 
+/**
+ * {@code SendPurchaseOrderMailHandle} é um {@link io.camunda.zeebe.client.api.worker.JobHandler}
+ * responsável por **enviar um e-mail de Pedido de Reposição (Purchase Order)**
+ * para o fornecedor quando o stock necessário não está disponível.
+ *
+ * <p>Esta classe lê as variáveis de processo ({@code materialName} e {@code quantityRequired})
+ * e utiliza a variável de ambiente {@code EMAIL_FORNECEDOR} (carregada via Dotenv)
+ * como destinatário para simular o pedido de compra.
+ *
+ * <p>Utiliza a utilidade {@link SendEmailUtils} para simular o envio de e-mail.
+ */
 public class SendPurchaseOrderMailHandle implements JobHandler {
 
+    /**
+     * Objeto Dotenv estático utilizado para carregar variáveis de ambiente,
+     * como o endereço de e-mail do fornecedor ({@code EMAIL_FORNECEDOR}).
+     */
     private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 
+    /**
+     * Trata a tarefa (Job) ativada do Camunda Zeebe.
+     *
+     * <p>O fluxo de trabalho é:
+     * <ol>
+     * <li>Obter variáveis de processo ({@code materialName}, {@code quantityRequired}).</li>
+     * <li>Obter o endereço de e-mail do fornecedor das variáveis de ambiente.</li>
+     * <li>Montar o assunto e o corpo do e-mail com os dados da reposição.</li>
+     * <li>Chamar {@link SendEmailUtils#sendEmail(String, String, String)} para simular o envio.</li>
+     * <li>Completar a tarefa.</li>
+     * </ol>
+     *
+     * @param client O cliente do Job para enviar comandos de conclusão ({@code complete}) ou falha ({@code fail}).
+     * @param job O Job ativado que contém os detalhes da tarefa e variáveis de entrada.
+     */
     @Override
     public void handle(JobClient client, ActivatedJob job) {
         System.out.println("\n>>> [EMAIL] A preparar pedido de reposição de stock...");
 
         try {
-            // Obter as variáveis do processo (Assumi que os materiais que faltavam ja foram calculados e guardados)
             Map<String, Object> variables = job.getVariablesAsMap();
 
             String materialName = (String) variables.getOrDefault("materialName", "Material Não Especificado");

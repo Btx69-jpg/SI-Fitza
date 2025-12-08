@@ -15,8 +15,35 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * {@code RegisterOrderHandle} é um {@link io.camunda.zeebe.client.api.worker.JobHandler}
+ * responsável por **receber os dados de uma nova encomenda** (tipicamente de um
+ * formulário ou API), **estruturá-los** nos objetos de negócio ({@link Order}) e
+ * **persistir a encomenda** (simulada via {@link OrdersUtils#saveOrderToDisk(Order)}).
+ *
+ * <p>Esta classe realiza a validação de tipos, gera IDs únicos para o cliente e
+ * para a encomenda, e envia o objeto {@code Order} completo de volta ao processo
+ * na variável {@code orderData}.
+ */
 public class RegisterOrderHandle implements JobHandler {
 
+    /**
+     * Trata a tarefa (Job) ativada do Camunda Zeebe.
+     *
+     * <p>O fluxo de trabalho principal é:
+     * <ol>
+     * <li>Obter variáveis soltas ({@code clientName}, {@code pizzaType}, etc.) do {@code ActivatedJob}.</li>
+     * <li>Converter e validar os dados de entrada, aplicando valores de teste se necessário.</li>
+     * <li>Gerar IDs únicos para o cliente e a encomenda.</li>
+     * <li>Criar os objetos de negócio {@link Cliente}, {@link OrderDescription} e o objeto {@link Order} principal.</li>
+     * <li>Chamar a utilidade {@link OrdersUtils#saveOrderToDisk(Order)} para simular o registo.</li>
+     * <li>Completar a tarefa, enviando o objeto {@code Order} completo na variável {@code orderData}.</li>
+     * </ol>
+     *
+     * @param client O cliente do Job para enviar comandos de conclusão ({@code complete}) ou falha ({@code fail}).
+     * @param job O Job ativado que contém os detalhes da tarefa e variáveis de entrada.
+     * @throws Exception Se ocorrer um erro durante o processamento ou persistência dos dados.
+     */
     @Override
     public void handle(JobClient client, ActivatedJob job) throws Exception {
         System.out.println("\n>>> [TASK: SOLICITAR ENCOMENDAS] A processar dados do formulário...");
@@ -24,28 +51,25 @@ public class RegisterOrderHandle implements JobHandler {
         try {
             Map<String, Object> variables = job.getVariablesAsMap();
 
-            // 1. LER DADOS DO FORMULÁRIO
+            //LER DADOS DO FORMULÁRIO
             String cName = (String) variables.get("clientName");
             String cEmail = (String) variables.get("clientEmail");
             String pTypeStr = (String) variables.get("pizzaType");
 
-            // O Camunda pode enviar números como Integer ou Double
             Number qtyNum = (Number) variables.get("quantity");
             int quantity = (qtyNum != null) ? qtyNum.intValue() : 1;
 
-            // Validação de segurança (caso venha vazio)
             if (cName == null || pTypeStr == null) {
                 System.out.println("   [!] Aviso: Campos vazios. A usar valores de teste.");
                 cName = (cName == null) ? "Cliente Balcão" : cName;
                 pTypeStr = (pTypeStr == null) ? "PEPPERONI" : pTypeStr;
             }
 
-            // 2. CRIAR OBJETOS JAVA
+            //CRIAR OBJETOS JAVA
             String clientId = "CLI-" + UUID.randomUUID().toString().substring(0, 5);
             Cliente cliente = new Cliente(clientId, cName);
             cliente.setMail(cEmail);
 
-            // Determinar Tipo de Pizza
             TypePizza typePizza;
             try {
                 typePizza = TypePizza.valueOf(pTypeStr);
@@ -54,10 +78,7 @@ public class RegisterOrderHandle implements JobHandler {
                 typePizza = TypePizza.PEPPERONI;
             }
 
-            // Criar Item do Pedido
             OrderDescription item = new OrderDescription(typePizza, quantity);
-
-            // Criar a Encomenda Completa
             String orderId = "ORD-" + UUID.randomUUID().toString().substring(0, 8);
             Order order = new Order(
                     orderId,
@@ -72,10 +93,10 @@ public class RegisterOrderHandle implements JobHandler {
             System.out.println("   > Pedido: " + quantity + "x " + typePizza);
 
             OrdersUtils.saveOrderToDisk(order);
-            // 3. PREPARAR SAÍDA
+
+            //PREPARAR SAÍDA
             Map<String, Object> output = new HashMap<>();
 
-            // Guardamos o objeto completo em 'orderData' para as próximas tarefas usarem
             output.put("orderData", order);
             output.put("orderId", orderId);
 

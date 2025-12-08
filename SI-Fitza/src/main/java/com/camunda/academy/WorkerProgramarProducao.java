@@ -7,7 +7,27 @@ import io.camunda.zeebe.client.api.response.Topology;
 
 import java.util.Scanner;
 
+/**
+ * **WorkerProgramarProducao**
+ *
+ * <p>Classe principal (main) responsável por inicializar e registar todos os
+ * *Workers* de serviço ({@code JobHandler}s) que executam a lógica de negócio
+ * para o processo de "Programar Produção" (Processo de Fábrica/ERP).
+ *
+ * <p>Ao ser executada, esta aplicação conecta-se ao cluster Zeebe e começa a
+ * ouvir ativamente as tarefas (Jobs) criadas pelo processo BPMN.
+ */
 public class WorkerProgramarProducao {
+
+    /**
+     * Ponto de entrada da aplicação.
+     *
+     * <p>Estabelece a conexão com o Zeebe, regista todos os *Workers* definidos
+     * em {@link #registerWorkers(ZeebeClient)} e mantém-se em execução até que
+     * o utilizador pressione ENTER.
+     *
+     * @param args Argumentos de linha de comando (não utilizados).
+     */
     public static void main(String[] args) {
         try (final ZeebeClient client = CamundaClientFactory.createClient()) {
 
@@ -32,6 +52,14 @@ public class WorkerProgramarProducao {
         }
     }
 
+    /**
+     * Regista todos os *Workers* de serviço no cliente Zeebe.
+     *
+     * <p>Cada *Worker* é associado a um tipo de tarefa ({@code jobType}) que
+     * corresponde ao nome da tarefa de serviço definida no modelo BPMN.
+     *
+     * @param client O cliente Zeebe ativo usado para criar os *Workers*.
+     */
     private static void registerWorkers(ZeebeClient client) {
         // [1] Validar a Encomenda
         client.newWorker()

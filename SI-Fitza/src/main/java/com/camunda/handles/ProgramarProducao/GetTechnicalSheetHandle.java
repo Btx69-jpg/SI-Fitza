@@ -16,8 +16,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * {@code GetTechnicalSheetHandle} é um {@link io.camunda.zeebe.client.api.worker.JobHandler}
+ * responsável por **obter a Ficha Técnica** de cada produto na encomenda e **calcular
+ * a quantidade total de matéria-prima necessária** para satisfazer o pedido.
+ *
+ * <p>Recebe a variável {@code orderData} (objeto {@link Order}) e calcula as
+ * necessidades multiplicando os requisitos unitários da Ficha Técnica (simulada
+ * via {@link #getMockTechnicalSheet(TypePizza)}) pela quantidade encomendada.
+ * O resultado é arredondado para o inteiro superior ({@code Math.ceil}).
+ *
+ * <p>A variável de saída é {@code materialsNeededList} ({@code List<MaterialNeeded>}).
+ */
 public class GetTechnicalSheetHandle implements JobHandler {
 
+    /**
+     * Trata a tarefa (Job) ativada do Camunda Zeebe.
+     *
+     * <p>O fluxo de trabalho principal é:
+     * <ol>
+     * <li>Obter o objeto {@code Order} da variável de processo {@code orderData}.</li>
+     * <li>Iterar sobre cada item da encomenda ({@code OrderDescription}).</li>
+     * <li>Para cada item, obter a ficha técnica (simulada) e calcular a quantidade
+     * total de matéria-prima (quantidade unitária * quantidade encomendada).</li>
+     * <li>Arredondar a quantidade total de matéria-prima para o inteiro superior.</li>
+     * <li>Completar a tarefa com a lista final de necessidades, {@code materialsNeededList}.</li>
+     * </ol>
+     *
+     * @param client O cliente do Job para enviar comandos de conclusão ({@code complete}) ou falha ({@code fail}).
+     * @param job O Job ativado que contém os detalhes da tarefa e variáveis de entrada.
+     * @throws Exception Se a variável {@code 'orderData'} não for encontrada ou se ocorrer um erro na conversão/cálculo.
+     */
     @Override
     public void handle(JobClient client, ActivatedJob job) throws Exception {
         System.out.println("\n>>> [TASK: FICHA TÉCNICA] A calcular materiais necessários...");
@@ -25,13 +54,13 @@ public class GetTechnicalSheetHandle implements JobHandler {
         try {
             Map<String, Object> variables = job.getVariablesAsMap();
 
-            // 1. Obter a Encomenda
+            //Obter a Encomenda
             if (!variables.containsKey("orderData")) {
                 throw new RuntimeException("Variável 'orderData' não encontrada!");
             }
             Order order = LoteUtils.getMapper().convertValue(variables.get("orderData"), Order.class);
 
-            // 2. Calcular Materiais (Cruzamento com Ficha Técnica)
+            //Calcular Materiais (Cruzamento com Ficha Técnica)
             List<MaterialNeeded> totalMaterialsNeeded = new ArrayList<>();
 
             for (OrderDescription item : order.getOrderDescription()) {
@@ -39,15 +68,10 @@ public class GetTechnicalSheetHandle implements JobHandler {
                 int quantidadePizzas = item.getQuantity();
 
                 System.out.println("   > Processar: " + type + " (Qtd: " + quantidadePizzas + ")");
-
-                // Simulação de busca à Base de Dados
                 ProductTechnicalSheet sheet = getMockTechnicalSheet(type);
 
-                // Multiplicar ingredientes pela quantidade de pizzas
                 for (MaterialNeeded mat : sheet.getMaterialNeeded()) {
                     double totalQty = mat.getQuantity() * quantidadePizzas;
-
-                    // Adicionar à lista final
                     RawMaterial rm = mat.getRawMaterial();
                     totalMaterialsNeeded.add(new MaterialNeeded(rm, (int) Math.ceil(totalQty)));
                 }
@@ -55,7 +79,7 @@ public class GetTechnicalSheetHandle implements JobHandler {
 
             System.out.println("   > Total de Ingredientes Calculados: " + totalMaterialsNeeded.size());
 
-            // 3. Enviar lista para a próxima etapa (Stock)
+            //Enviar lista para a próxima etapa (Stock)
             Map<String, Object> output = new HashMap<>();
             output.put("materialsNeededList", totalMaterialsNeeded);
 

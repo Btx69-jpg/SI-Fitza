@@ -44,7 +44,6 @@ public class CalculateDeliveryDateHandle implements JobHandler {
         System.out.println("\n>>> [TASK: ESTIMAR PRAZOS] A calcular data de entrega (Simulação)...");
 
         try {
-            // Lógica: Gerar uma data aleatória entre Hoje e Hoje + 2 Semanas (14 dias)
             Random random = new Random();
             int daysToAdd = random.nextInt(15); // Gera um número de 0 a 14
 

@@ -13,8 +13,30 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.UUID;
 
+/**
+ * **Simulador de Envio de Pedido de Cliente (ClientOrderSendSimulation)**.
+ *
+ * <p>Esta classe simula um sistema de E-commerce ou um serviço externo que capta
+ * os dados de uma encomenda do utilizador através da consola e publica uma
+ * mensagem no Camunda Zeebe para iniciar o processo de Produção.
+ *
+ * <p>A mensagem publicada usa o nome {@code "orderRequest"} e é correlacionada
+ * pelo {@code orderId}.
+ */
 public class ClientOrderSendSimulation {
 
+    /**
+     * Ponto de entrada da aplicação de simulação.
+     *
+     * <p>Permite ao utilizador inserir o nome, email, tipo de pizza e quantidade
+     * desejada, criando os objetos de modelo {@link Cliente}, {@link OrderDescription}
+     * e {@link Order}.
+     *
+     * <p>Finalmente, publica a mensagem {@code "orderRequest"} no Zeebe, iniciando
+     * o processo BPMN.
+     *
+     * @param args Argumentos de linha de comando (não utilizados).
+     */
     public static void main(String[] args) {
         try (final ZeebeClient client = CamundaClientFactory.createClient()) {
             Scanner scanner = new Scanner(System.in);
