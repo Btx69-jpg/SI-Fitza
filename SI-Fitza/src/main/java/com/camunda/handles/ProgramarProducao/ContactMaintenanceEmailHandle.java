@@ -1,5 +1,4 @@
 package com.camunda.handles.ProgramarProducao;
-import com.camunda.utils.SendEmailUtils;
 import io.camunda.zeebe.client.api.response.ActivatedJob;
 import io.camunda.zeebe.client.api.worker.JobClient;
 import io.camunda.zeebe.client.api.worker.JobHandler;
@@ -7,7 +6,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 import java.util.Map;
 
-public class ContactMaintenanceEmailHandler implements JobHandler {
+public class ContactMaintenanceEmailHandle implements JobHandler {
 
     private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 
