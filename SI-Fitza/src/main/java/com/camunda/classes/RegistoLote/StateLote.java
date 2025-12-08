@@ -4,28 +4,20 @@ import com.camunda.classes.RegistoLote.Enums.LoteState;
 
 public class StateLote {
     private LoteState state;
-    private String discartReason;
+    private DiscartReason discartReason;
 
-    public StateLote() {}
+    public StateLote() { }
 
-    public StateLote(LoteState state, String discartReason) {
-        this.state = state;
+    public StateLote(DiscartReason discartReason, LoteState state) {
         this.discartReason = discartReason;
+        this.state = state;
+    }
+
+    public DiscartReason getDiscartReason() {
+        return discartReason;
     }
 
     public LoteState getState() {
         return state;
-    }
-
-    public String getDiscartReason() {
-        return discartReason;
-    }
-
-    public void setState(LoteState state) {
-        this.state = state;
-    }
-
-    public void setDiscartReason(String discartReason) {
-        this.discartReason = discartReason;
     }
 }

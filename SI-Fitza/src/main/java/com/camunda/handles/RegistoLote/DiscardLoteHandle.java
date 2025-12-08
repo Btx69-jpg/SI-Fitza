@@ -1,7 +1,10 @@
 package com.camunda.handles.RegistoLote;
 
+import com.camunda.classes.RegistoLote.DiscartReason;
+import com.camunda.classes.RegistoLote.Enums.ActorDiscartLote;
 import com.camunda.classes.RegistoLote.Enums.LoteState;
 import com.camunda.classes.RegistoLote.Lote;
+import com.camunda.classes.RegistoLote.StateLote;
 import com.camunda.utils.LoteUtils;
 import io.camunda.zeebe.client.api.response.ActivatedJob;
 import io.camunda.zeebe.client.api.worker.JobClient;
@@ -18,15 +21,16 @@ public class DiscardLoteHandle implements JobHandler {
 
             Map<String, Object> variables = job.getVariablesAsMap();
 
-            String discardReason = (String) variables.getOrDefault("rejectionReason", "Motivo não especificado pelo Laboratório");
+            String reasonMsg = (String) variables.getOrDefault("rejectionReason", "Motivo não especificado");
 
             Lote lote = LoteUtils.getLoteFromJob(job);
-            lote.getLoteState().setState(LoteState.DISCARDED);
-            lote.getLoteState().setDiscartReason(discardReason);
+            DiscartReason motivoObjeto = new DiscartReason(reasonMsg, ActorDiscartLote.LABORATORY);
+            StateLote novoEstado = new StateLote(motivoObjeto, LoteState.DISCARDED);
 
+            lote.setLoteState(novoEstado);
             LoteUtils.saveLoteToDisk(lote);
 
-            System.out.println("WARN: O Lote " + lote.getLoteId() + " foi descartado.");
+            System.out.println("WARN: O Lote " + lote.getLoteId() + " foi descartado pelo Laboratório.");
 
             client.newCompleteCommand(job.getKey())
                     .send()

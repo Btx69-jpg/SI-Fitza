@@ -84,11 +84,16 @@ public class WorkerRegistoLoteRunner {
                 .name("sendLabEmailWorker")
                 .open();
 
+        System.out.println(">>> JobWorker 'SendLabSampleEmailHandle' registado e ativo.");
+
         client.newWorker()
                 .jobType("discardLote")
                 .handler(new DiscardLoteHandle())
                 .name("discardLoteWorker")
                 .open();
+
+        System.out.println(">>> JobWorker 'DiscardLoteHandle' registado e ativo.");
+
 
         client.newWorker()
                 .jobType("approveLote")
@@ -96,7 +101,6 @@ public class WorkerRegistoLoteRunner {
                 .name("approveLoteWorker")
                 .open();
 
-        System.out.println(">>> JobWorker 'SendLabSampleEmailHandle' registado e ativo.");
-
+        System.out.println(">>> JobWorker 'ApproveLoteHandle' registado e ativo.");
     }
 }

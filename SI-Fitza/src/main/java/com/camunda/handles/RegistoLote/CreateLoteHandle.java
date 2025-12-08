@@ -3,11 +3,11 @@ package com.camunda.handles.RegistoLote;
 import com.camunda.classes.Cliente;
 import com.camunda.classes.RegistoLote.Enums.TypePizza;
 import com.camunda.classes.RegistoLote.Lote;
+import com.camunda.utils.LoteUtils;
 import io.camunda.zeebe.client.api.response.ActivatedJob;
 import io.camunda.zeebe.client.api.worker.JobClient;
 import io.camunda.zeebe.client.api.worker.JobHandler;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class CreateLoteHandle implements JobHandler {
@@ -29,6 +29,7 @@ public class CreateLoteHandle implements JobHandler {
                     System.err.println("Tipo inválido: " + typePizzaStr);
                 }
             }
+
             Number qtyInput = (Number) variables.get("producedQuantity");
             float producedQuantity = (qtyInput != null) ? qtyInput.floatValue() : 0.0f;
 
@@ -50,13 +51,16 @@ public class CreateLoteHandle implements JobHandler {
                     typePizza,
                     isOrder,
                     producedQuantity,
-                    clienteObj,
-                    null,
-                    null
+                    clienteObj
             );
 
-            Map<String, Object> outputVariables = new HashMap<>();
-            outputVariables.put("lote", novoLote);
+            Map<String, Object> outputVariables = LoteUtils.wrapLoteVariable(novoLote);
+
+            outputVariables.put("typePizza", null);
+            outputVariables.put("producedQuantity", null);
+            outputVariables.put("isOrder", null);
+            outputVariables.put("clienteId", null);
+            outputVariables.put("clienteName", null);
 
             client.newCompleteCommand(job.getKey())
                     .variables(outputVariables)
