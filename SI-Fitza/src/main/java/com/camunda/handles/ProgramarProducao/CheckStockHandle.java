@@ -33,7 +33,7 @@ public class CheckStockHandle implements JobHandler {
 
 
             for (MaterialNeeded item : requiredList) {
-                // Simula consulta à DB de Inventário
+                // Simula consulta do stock
                 boolean itemInStock = random.nextDouble() > 0.2;
 
                 if (!itemInStock) {

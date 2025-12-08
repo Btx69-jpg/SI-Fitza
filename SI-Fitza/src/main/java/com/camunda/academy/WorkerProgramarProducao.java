@@ -14,41 +14,63 @@ public class WorkerProgramarProducao {
             final Topology topology = client.newTopologyRequest().send().join();
             System.out.println("Conexão com sucesso! Cluster size: " + topology.getClusterSize());
 
-            // Passo 1: Receber e Validar Encomenda
+            System.out.println(">>> A REGISTAR WORKERS DO PROCESSO DE PRODUÇÃO...");
+
+
+            // Passo 1: Receber e Validar a Encomenda
             client.newWorker()
-                    .jobType("solicitar_encomenda")
+                    .jobType("solicitar_encomendas")
                     .handler(new GetProductOrderDetailsHandle())
                     .name("orderWorker")
                     .timeout(10000)
                     .open();
-            System.out.println(">>> Worker 'solicitar_encomendas' Ativo.");
+            System.out.println("   [1] Worker 'solicitar_encomendas' (Validar Pedido) -> ATIVO");
 
             // Passo 2: Calcular Materiais (Ficha Técnica)
             client.newWorker()
-                    .jobType("calculate_materials_needs") // ou "ficha_produto", confirma o teu BPMN
+                    .jobType("calculate_materials_needs")
                     .handler(new CalculateRawMaterialNeedsHandle())
                     .name("technicalWorker")
                     .timeout(10000)
                     .open();
-            System.out.println(">>> Worker 'calculate_materials_needs' Ativo.");
+            System.out.println("   [2] Worker 'calculate_materials_needs' (Ficha Técnica) -> ATIVO");
 
-            // Passo 3: Verificar Stock no Armazém
+            // Passo 3: Verificar Stock
             client.newWorker()
                     .jobType("verificar_stock")
                     .handler(new CheckStockHandle())
                     .name("stockWorker")
                     .timeout(10000)
                     .open();
-            System.out.println(">>> Worker 'verificar_stock' Ativo.");
+            System.out.println("   [3] Worker 'verificar_stock' (Armazém) -> ATIVO");
 
-            // Passo 4: Verificar Estado das Máquinas (5 Máquinas)
+            // Alternativa 3b: Enviar Email ao Fornecedor (Caso falte stock)
+            client.newWorker()
+                    .jobType("email_fornecedor")
+                    .handler(new SendPurchaseOrderMailHandle())
+                    .name("emailSupplierWorker")
+                    .timeout(10000)
+                    .open();
+            System.out.println("   [3b] Worker 'email_fornecedor' (Reposição) -> ATIVO");
+
+
+            // Passo 4: Verificar Estado das Máquinas
             client.newWorker()
                     .jobType("check_machines")
                     .handler(new CheckMachineStatusHandle())
                     .name("machineWorker")
                     .timeout(10000)
                     .open();
-            System.out.println(">>> Worker 'check_machines' Ativo.");
+            System.out.println("   [4] Worker 'check_machines' (Manutenção) -> ATIVO");
+
+            // Alternativa 4b: Enviar Email à Manutenção (Caso haja avaria)
+            client.newWorker()
+                    .jobType("email_manutencao")
+                    .handler(new ContactMaintenanceEmailHandle())
+                    .name("emailMaintWorker")
+                    .timeout(10000)
+                    .open();
+            System.out.println("   [4b] Worker 'email_manutencao' (Alerta) -> ATIVO");
 
             // Passo 5: Estimar Prazo de Entrega
             client.newWorker()
@@ -57,49 +79,30 @@ public class WorkerProgramarProducao {
                     .name("deliveryWorker")
                     .timeout(10000)
                     .open();
-            System.out.println(">>> Worker 'estimar_prazo' Ativo.");
+            System.out.println("   [5] Worker 'estimar_prazo' (Cálculo Data) -> ATIVO");
 
-            // Passo 6 (Opcional): Guardar Ordem na BD (se implementaste)
-            // client.newWorker()
-            //         .jobType("store_order")
-            //         .handler(new SaveProductionOrderHandle())
-            //         .name("dbWorker")
-            //         .open();
+            // Passo 6: Registar Ordem de Produção
+            client.newWorker()
+                    .jobType("registar_ordem")
+                    .handler(new RegisterOrderHandle())
+                    .name("autoRegisterWorker")
+                    .timeout(10000)
+                    .open();
+            System.out.println("   [6] Worker 'registar_ordem' (Base de Dados) -> ATIVO");
 
-            // --------------------------------------------------------
-            // 2. REGISTO DOS WORKERS DE EMAIL E NOTIFICAÇÕES
-            // --------------------------------------------------------
-
-            // Enviar Email ao Cliente (Prazo)
+            // Passo 7: Notificar Cliente
             client.newWorker()
                     .jobType("notificar_cliente")
                     .handler(new NotifyClientDeadlineEmailHandle())
                     .name("emailClientWorker")
                     .timeout(10000)
                     .open();
-            System.out.println(">>> Worker 'notificar_cliente' Ativo.");
-
-            // Enviar Email ao Fornecedor (Falta de Stock)
-            client.newWorker()
-                    .jobType("email_fornecedor")
-                    .handler(new SendPurchaseOrderMailHandle())
-                    .name("emailSupplierWorker")
-                    .timeout(10000)
-                    .open();
-            System.out.println(">>> Worker 'email_fornecedor' Ativo.");
-
-            // Enviar Email à Manutenção (Máquina Avariada)
-            client.newWorker()
-                    .jobType("email_manutencao")
-                    .handler(new ContactMaintenanceEmailHandle())
-                    .name("emailMaintWorker")
-                    .timeout(10000)
-                    .open();
+            System.out.println("   [7] Worker 'notificar_cliente' (Confirmação) -> ATIVO");
 
 
-            System.out.println(">>> Worker 'email_manutencao' Ativo.");
-            System.out.println("\n [SISTEMA A CORRER] O worker está à espera de tarefas.");
-            System.out.println(" Prime ENTER para parar a aplicação e sair...");
+            System.out.println("\n>>> SISTEMA PRONTO! TODOS OS WORKERS ESTÃO À ESCUTA.");
+            System.out.println("    (Podes iniciar o processo no Tasklist agora)");
+            System.out.println("    Prime ENTER para encerrar a aplicação...");
 
             Scanner sc = new Scanner(System.in);
             sc.nextLine();
