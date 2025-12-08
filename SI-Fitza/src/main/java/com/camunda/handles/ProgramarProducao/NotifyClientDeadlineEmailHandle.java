@@ -7,7 +7,7 @@ import io.camunda.zeebe.client.api.worker.JobHandler;
 
 import java.util.Map;
 
-public class NotifyClientDeadlineEmailHandler implements JobHandler {
+public class NotifyClientDeadlineEmailHandle implements JobHandler {
 
     @Override
     public void handle(JobClient client, ActivatedJob job) {

@@ -16,71 +16,63 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GetProductOrderDetailsHandle implements JobHandler {
+public class GetTechnicalSheetHandle implements JobHandler {
 
     @Override
     public void handle(JobClient client, ActivatedJob job) throws Exception {
-        System.out.println("\n>>> [TASK: SOLICITAR ENCOMENDAS] A processar detalhes da encomenda...");
+        System.out.println("\n>>> [TASK: FICHA TÉCNICA] A calcular materiais necessários...");
 
         try {
             Map<String, Object> variables = job.getVariablesAsMap();
 
-            // 1. Converter a variável 'orderData' (JSON) para o objeto Java Order
+            // 1. Obter a Encomenda
             if (!variables.containsKey("orderData")) {
-                throw new RuntimeException("A variável 'orderData' não foi encontrada!");
+                throw new RuntimeException("Variável 'orderData' não encontrada!");
             }
-
             Order order = LoteUtils.getMapper().convertValue(variables.get("orderData"), Order.class);
 
-            System.out.println("   > ID Encomenda: " + order.getOrderId());
-            System.out.println("   > Cliente: " + order.getClientData().getName());
-
-            // 2. Calcular Materiais Necessários (Simulação de Ficha Técnica)
+            // 2. Calcular Materiais (Cruzamento com Ficha Técnica)
             List<MaterialNeeded> totalMaterialsNeeded = new ArrayList<>();
 
             for (OrderDescription item : order.getOrderDescription()) {
                 TypePizza type = item.getTypePizza();
-                int qtdPizzas = item.getQuantity();
+                int quantidadePizzas = item.getQuantity();
 
-                System.out.println("   > Item: " + type + " | Qtd: " + qtdPizzas);
+                System.out.println("   > Processar: " + type + " (Qtd: " + quantidadePizzas + ")");
 
-                // Obter a ficha técnica (Mock)
+                // Simulação de busca à Base de Dados
                 ProductTechnicalSheet sheet = getMockTechnicalSheet(type);
 
-                // Calcular totais para este item e adicionar à lista
+                // Multiplicar ingredientes pela quantidade de pizzas
                 for (MaterialNeeded mat : sheet.getMaterialNeeded()) {
-                    double totalQty = mat.getQuantity() * qtdPizzas;
+                    double totalQty = mat.getQuantity() * quantidadePizzas;
 
-                    // Nota: Numa app real, devíamos agrupar materiais repetidos (ex: somar farinha de várias pizzas)
-                    // Aqui simplificamos criando uma entrada nova para cada necessidade.
+                    // Adicionar à lista final
                     RawMaterial rm = mat.getRawMaterial();
-                    MaterialNeeded needed = new MaterialNeeded(rm, (int) Math.ceil(totalQty));
-
-                    totalMaterialsNeeded.add(needed);
+                    totalMaterialsNeeded.add(new MaterialNeeded(rm, (int) Math.ceil(totalQty)));
                 }
             }
 
-            System.out.println("   > Total de materiais calculados: " + totalMaterialsNeeded.size() + " itens.");
+            System.out.println("   > Total de Ingredientes Calculados: " + totalMaterialsNeeded.size());
 
-            // 3. Enviar a lista de materiais para o processo
-            Map<String, Object> outputVariables = new HashMap<>();
-            outputVariables.put("materialsNeededList", totalMaterialsNeeded);
+            // 3. Enviar lista para a próxima etapa (Stock)
+            Map<String, Object> output = new HashMap<>();
+            output.put("materialsNeededList", totalMaterialsNeeded);
 
             client.newCompleteCommand(job.getKey())
-                    .variables(outputVariables)
+                    .variables(output)
                     .send()
                     .join();
-
-            System.out.println(">>> Detalhes da encomenda processados.");
 
         } catch (Exception e) {
             e.printStackTrace();
             client.newFailCommand(job.getKey())
                     .retries(0)
-                    .errorMessage("Erro ao processar encomenda: " + e.getMessage())
+                    .errorMessage("Erro na ficha técnica: " + e.getMessage())
                     .send()
                     .join();
         }
     }
-
 }
+
+
