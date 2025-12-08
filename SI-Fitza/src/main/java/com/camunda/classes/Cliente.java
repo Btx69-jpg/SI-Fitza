@@ -6,6 +6,7 @@ public class Cliente {
     private String clienteId;
     @JsonProperty("clienteName")
     private String name;
+    private String mail;
 
     public Cliente() {}
 
@@ -24,5 +25,12 @@ public class Cliente {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getMail() {
+        return mail;
+    }
+    public void setMail(String mail) {
+        this.mail = mail;
     }
 }
