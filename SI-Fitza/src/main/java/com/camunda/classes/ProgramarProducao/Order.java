@@ -10,6 +10,7 @@ public class Order {
     private OrderDescription[] orderDescription;
 
     public Order() {}
+
     public Order(String orderId, String orderDate, String orderStatus, Cliente ClientData, OrderDescription orderDescription) {
         this.orderId = orderId;
         this.orderDate = orderDate;
