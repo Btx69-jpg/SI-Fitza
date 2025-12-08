@@ -1,12 +1,15 @@
 package com.camunda.utils;
 
 import com.camunda.classes.RegistoLote.Lote;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.camunda.zeebe.client.api.response.ActivatedJob;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,8 +76,14 @@ public class LoteUtils {
      * @return Um Map contendo a chave {@code "lote"} e o objeto serializável.
      */
     public static Map<String, Object> wrapLoteVariable(Lote lote) {
+        Map<String, Object> loteMap = objectMapper.convertValue(
+                lote,
+                new TypeReference<>() {}
+        );
+
         Map<String, Object> variables = new HashMap<>();
-        variables.put("lote", lote);
+        variables.put("lote", loteMap);
+
         return variables;
     }
 
@@ -89,5 +98,28 @@ public class LoteUtils {
      */
     public static ObjectMapper getMapper() {
         return objectMapper;
+    }
+
+    public static void saveLoteToDisk(Lote lote) {
+        try {
+            String folderName = "lotesGerados";
+            File directory = new File(folderName);
+
+            if (!directory.exists()) {
+                boolean criado = directory.mkdirs();
+                if(criado) System.out.println(">>> Pasta 'lotes_gerados' criada com sucesso.");
+            }
+
+            String filename = String.format("Lote_%s_%s.json", lote.getLoteId(), lote.getLoteState().getState());
+            filename = filename.replaceAll("[/\\\\:*?\"<>|]", "_");
+
+            File file = new File(directory, filename);
+            objectMapper.writeValue(file, lote);
+
+            System.out.println(">>> [BACKUP] Ficheiro JSON guardado em: " + file.getAbsolutePath());
+        } catch (IOException e) {
+            System.err.println("ERRO ao guardar ficheiro JSON: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

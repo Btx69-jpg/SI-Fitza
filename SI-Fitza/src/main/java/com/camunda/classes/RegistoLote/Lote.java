@@ -32,7 +32,7 @@ public class Lote {
     private String loteId;
 
     /** Estado atual do lote (Bloqueado, Em Produção, Libertado, etc.). */
-    private LoteState loteState;
+    private StateLote loteState;
 
     /** Tipo de pizza produzida neste lote (ex: MARGHERITA, PEPPERONI). */
     private TypePizza typePizza;
@@ -55,9 +55,6 @@ public class Lote {
     /** Lista de matérias-primas consumidas na produção deste lote. */
     private List<RawMaterialUsed> rawMaterialUsed;
 
-    /** Registos das operações de limpeza efetuadas na linha antes/durante o lote. */
-    private List<CleaningLine> cleaningLine;
-
     /**
      * Construtor vazio necessário para serialização/deserialização (Jackson/JSON).
      */
@@ -65,7 +62,6 @@ public class Lote {
         this.machineReadings = new ArrayList<>();
         this.roomSensors = new ArrayList<>();
         this.rawMaterialUsed = new ArrayList<>();
-        this.cleaningLine = new ArrayList<>();
     }
 
     /**
@@ -80,21 +76,17 @@ public class Lote {
      * @param isOrder          Se é uma encomenda personalizada.
      * @param producedQuantity Quantidade planeada/produzida.
      * @param cliente          Cliente associado (pode ser null se for stock).
-     * @param rawMaterialUsed  Lista inicial de materiais usados.
-     * @param cleaningLine     Lista inicial de registos de limpeza.
      */
     public Lote(String loteId, TypePizza typePizza, boolean isOrder,
-                float producedQuantity, Cliente cliente,
-                List<RawMaterialUsed> rawMaterialUsed, List<CleaningLine> cleaningLine) {
+                float producedQuantity, Cliente cliente) {
 
         this.loteId = loteId;
-        this.loteState = LoteState.BLOCKED;
+        this.loteState = new StateLote(null, LoteState.BLOCKED);
         this.typePizza = typePizza;
         this.isOrder = isOrder;
         this.producedQuantity = producedQuantity;
         this.cliente = cliente;
-        this.rawMaterialUsed = (rawMaterialUsed != null) ? rawMaterialUsed : new ArrayList<>();
-        this.cleaningLine = (cleaningLine != null) ? cleaningLine : new ArrayList<>();
+        this.rawMaterialUsed = new ArrayList<>();
         this.machineReadings = new ArrayList<>();
         this.roomSensors = new ArrayList<>();
     }
@@ -118,4 +110,25 @@ public class Lote {
         }
         this.roomSensors.add(roomSensor);
     }
+
+    public String getLoteId() { return loteId; }
+
+    public StateLote getLoteState() { return loteState; }
+
+    public void setLoteState(StateLote loteState) { this.loteState = loteState; } // Setter também ajuda
+
+    public TypePizza getTypePizza() { return typePizza; }
+
+    public float getProducedQuantity() { return producedQuantity; }
+
+    @JsonProperty("order") // Importante manter a anotação no getter também se houver conflito
+    public boolean isOrder() { return isOrder; }
+
+    public Cliente getCliente() { return cliente; }
+
+    public List<Machine> getMachineReadings() { return machineReadings; }
+
+    public List<RoomSensor> getRoomSensors() { return roomSensors; }
+
+    public List<RawMaterialUsed> getRawMaterialUsed() { return rawMaterialUsed; }
 }
