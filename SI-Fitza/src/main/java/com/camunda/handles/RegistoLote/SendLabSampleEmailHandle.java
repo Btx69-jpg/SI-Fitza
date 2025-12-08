@@ -30,12 +30,15 @@ public class SendLabSampleEmailHandle implements JobHandler {
             );
 
             SendEmailUtils.sendEmail(destinatario, assunto, corpo);
+
+            client.newCompleteCommand(job.getKey())
+                    .send()
+                    .join();
         } catch (Exception e) {
             e.printStackTrace();
-            // Se o email falhar, podes querer tentar de novo ou falhar o job
             client.newFailCommand(job.getKey())
                     .retries(0)
-                    .errorMessage("Falha no envio de email: " + e.getMessage())
+                    .errorMessage("Erro fatal de email: " + e.getMessage())
                     .send()
                     .join();
         }
