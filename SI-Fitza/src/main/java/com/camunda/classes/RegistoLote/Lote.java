@@ -32,7 +32,7 @@ public class Lote {
     private String loteId;
 
     /** Estado atual do lote (Bloqueado, Em Produção, Libertado, etc.). */
-    private LoteState loteState;
+    private StateLote loteState;
 
     /** Tipo de pizza produzida neste lote (ex: MARGHERITA, PEPPERONI). */
     private TypePizza typePizza;
@@ -88,7 +88,7 @@ public class Lote {
                 List<RawMaterialUsed> rawMaterialUsed, List<CleaningLine> cleaningLine) {
 
         this.loteId = loteId;
-        this.loteState = LoteState.BLOCKED;
+        this.loteState = new StateLote(LoteState.BLOCKED, null);
         this.typePizza = typePizza;
         this.isOrder = isOrder;
         this.producedQuantity = producedQuantity;
@@ -118,4 +118,14 @@ public class Lote {
         }
         this.roomSensors.add(roomSensor);
     }
+
+    public String getLoteId() {
+        return loteId;
+    }
+
+    public StateLote getLoteState() { // Retorna StateLote, não LoteState
+        return loteState;
+    }
+
+
 }

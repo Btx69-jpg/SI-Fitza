@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.camunda.zeebe.client.api.response.ActivatedJob;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,5 +91,28 @@ public class LoteUtils {
      */
     public static ObjectMapper getMapper() {
         return objectMapper;
+    }
+
+    public static void saveLoteToDisk(Lote lote) {
+        try {
+            String folderName = "lotesGerados";
+            File directory = new File(folderName);
+
+            if (!directory.exists()) {
+                boolean criado = directory.mkdirs();
+                if(criado) System.out.println(">>> Pasta 'lotes_gerados' criada com sucesso.");
+            }
+
+            String filename = String.format("Lote_%s_%s.json", lote.getLoteId(), lote.getLoteState());
+            filename = filename.replaceAll("[/\\\\:*?\"<>|]", "_");
+
+            File file = new File(directory, filename);
+            objectMapper.writeValue(file, lote);
+
+            System.out.println(">>> [BACKUP] Ficheiro JSON guardado em: " + file.getAbsolutePath());
+        } catch (IOException e) {
+            System.err.println("ERRO ao guardar ficheiro JSON: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
