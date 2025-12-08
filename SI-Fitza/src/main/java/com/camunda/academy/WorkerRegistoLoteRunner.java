@@ -1,6 +1,6 @@
 package com.camunda.academy;
 
-import com.camunda.handles.*;
+import com.camunda.handles.RegistoLote.*;
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.Topology;
 import io.camunda.zeebe.client.impl.oauth.OAuthCredentialsProvider;

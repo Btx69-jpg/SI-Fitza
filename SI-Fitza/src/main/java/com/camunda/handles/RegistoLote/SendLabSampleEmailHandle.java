@@ -1,4 +1,4 @@
-package com.camunda.handles;
+package com.camunda.handles.RegistoLote;
 
 import com.camunda.utils.SendEmailUtils;
 import io.camunda.zeebe.client.api.response.ActivatedJob;

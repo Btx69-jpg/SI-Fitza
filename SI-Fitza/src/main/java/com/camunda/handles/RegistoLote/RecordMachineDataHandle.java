@@ -1,4 +1,4 @@
-package com.camunda.handles;
+package com.camunda.handles.RegistoLote;
 
 import com.camunda.classes.RegistoLote.Enums.MachineStatus;
 import com.camunda.classes.RegistoLote.machines.Machine;

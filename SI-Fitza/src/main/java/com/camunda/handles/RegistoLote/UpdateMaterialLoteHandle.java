@@ -1,4 +1,4 @@
-package com.camunda.handles;
+package com.camunda.handles.RegistoLote;
 
 import com.camunda.classes.RegistoLote.RawMaterial;
 import com.camunda.classes.RegistoLote.RawMaterialUsed;
