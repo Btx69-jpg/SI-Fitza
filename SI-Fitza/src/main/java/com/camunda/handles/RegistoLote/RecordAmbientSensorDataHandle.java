@@ -1,6 +1,5 @@
-package com.camunda.handles;
+package com.camunda.handles.RegistoLote;
 
-import com.camunda.classes.RegistoLote.Lote;
 import com.camunda.classes.RegistoLote.sensores.AirQualitySensor;
 import com.camunda.classes.RegistoLote.sensores.HumiditySensor;
 import com.camunda.classes.RegistoLote.sensores.RoomSensor;
