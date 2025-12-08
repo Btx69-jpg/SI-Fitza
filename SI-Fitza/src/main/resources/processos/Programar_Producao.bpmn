@@ -29,7 +29,7 @@
         <bpmn:flowNodeRef>checkStockLevels</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>orderRequest</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>requestOrders</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_0nsgop5</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>orderId</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_0jynvgj" name="Sistema MES">
         <bpmn:flowNodeRef>contactMaintenance</bpmn:flowNodeRef>
@@ -209,11 +209,11 @@
         <bpmn:targetRef>ficha_stock</bpmn:targetRef>
       </bpmn:dataOutputAssociation>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_02529xk" sourceRef="orderRequest" targetRef="Activity_0nsgop5" />
+    <bpmn:sequenceFlow id="Flow_02529xk" sourceRef="orderRequest" targetRef="orderId" />
     <bpmn:startEvent id="orderRequest" name="Inicio do Planemento">
       <bpmn:outgoing>Flow_02529xk</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="Flow_0yrp51e" sourceRef="Activity_0nsgop5" targetRef="requestOrders" />
+    <bpmn:sequenceFlow id="Flow_0yrp51e" sourceRef="orderId" targetRef="requestOrders" />
     <bpmn:serviceTask id="requestOrders" name="Solicitar Encomendas">
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="requestOrders" />
@@ -221,7 +221,7 @@
       <bpmn:incoming>Flow_0yrp51e</bpmn:incoming>
       <bpmn:outgoing>Flow_0wkpg15</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:receiveTask id="Activity_0nsgop5" name="Receção encomenda de cliente" messageRef="Message_1vucitf">
+    <bpmn:receiveTask id="orderId" name="Receção encomenda de cliente" messageRef="Message_1vucitf">
       <bpmn:incoming>Flow_02529xk</bpmn:incoming>
       <bpmn:outgoing>Flow_0yrp51e</bpmn:outgoing>
     </bpmn:receiveTask>
@@ -359,7 +359,7 @@
         <dc:Bounds x="820" y="425" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_042yih3_di" bpmnElement="Activity_0nsgop5">
+      <bpmndi:BPMNShape id="Activity_042yih3_di" bpmnElement="orderId">
         <dc:Bounds x="680" y="425" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="DataObjectReference_0pomw0j_di" bpmnElement="DataObjectReference_0pomw0j">
@@ -498,14 +498,6 @@
         <di:waypoint x="780" y="465" />
         <di:waypoint x="820" y="465" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="DataOutputAssociation_0kr1pvj_di" bpmnElement="DataOutputAssociation_0kr1pvj">
-        <di:waypoint x="1172" y="505" />
-        <di:waypoint x="1174" y="550" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="DataOutputAssociation_05vhybw_di" bpmnElement="DataOutputAssociation_05vhybw">
-        <di:waypoint x="1341" y="505" />
-        <di:waypoint x="1340" y="550" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataOutputAssociation_0nr5d9u_di" bpmnElement="DataOutputAssociation_0nr5d9u">
         <di:waypoint x="2099" y="505" />
         <di:waypoint x="2099" y="545" />
@@ -517,6 +509,14 @@
       <bpmndi:BPMNEdge id="DataOutputAssociation_1d78aex_di" bpmnElement="DataOutputAssociation_1d78aex">
         <di:waypoint x="2919" y="505" />
         <di:waypoint x="2919" y="550" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOutputAssociation_0kr1pvj_di" bpmnElement="DataOutputAssociation_0kr1pvj">
+        <di:waypoint x="1172" y="505" />
+        <di:waypoint x="1174" y="550" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOutputAssociation_05vhybw_di" bpmnElement="DataOutputAssociation_05vhybw">
+        <di:waypoint x="1341" y="505" />
+        <di:waypoint x="1340" y="550" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
