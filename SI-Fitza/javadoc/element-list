@@ -1,0 +1,12 @@
+com.camunda.academy
+com.camunda.academy.ReceiverTasks.ProgramarProducao
+com.camunda.academy.ReceiverTasks.RegistoLote
+com.camunda.classes
+com.camunda.classes.ProgramarProducao
+com.camunda.classes.RegistoLote
+com.camunda.classes.RegistoLote.Enums
+com.camunda.classes.RegistoLote.machines
+com.camunda.classes.RegistoLote.sensores
+com.camunda.handles.ProgramarProducao
+com.camunda.handles.RegistoLote
+com.camunda.utils

@@ -63,7 +63,6 @@ public class CheckStockHandle implements JobHandler {
 
 
             for (MaterialNeeded item : requiredList) {
-                // Simula consulta do stock
                 boolean itemInStock = random.nextDouble() > 0.2;
 
                 if (!itemInStock) {

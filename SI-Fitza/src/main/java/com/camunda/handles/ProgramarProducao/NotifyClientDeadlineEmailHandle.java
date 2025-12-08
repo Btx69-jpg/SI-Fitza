@@ -43,34 +43,45 @@ public class NotifyClientDeadlineEmailHandle implements JobHandler {
             Map<String, Object> variables = job.getVariablesAsMap();
 
             String clientName = (String) variables.get("clientName");
-            String clientEmail = (String) variables.get("clientEmail");
+            String clientEmail = (String) variables.get("mail");
 
             if (clientEmail == null || clientName == null) {
                 Map<String, Object> orderData = (Map<String, Object>) variables.get("orderData");
+
                 if (orderData != null) {
-                    Map<String, Object> clientData = (Map<String, Object>) orderData.get("ClientData");
-                    if (clientData != null) {
-                        clientName = (String) clientData.getOrDefault("clienteName", "Cliente");
-                        clientEmail = (String) clientData.getOrDefault("mail", "");
+                    Map<String, Object> clientDataObj = (Map<String, Object>) orderData.get("clientData");
+
+                    if (clientDataObj != null) {
+                        if (clientName == null) {
+                            clientName = (String) clientDataObj.getOrDefault("clienteName", "Cliente");
+                        }
+
+                        if (clientEmail == null) {
+                            clientEmail = (String) clientDataObj.get("mail");
+                        }
                     }
                 }
             }
 
-            String deliveryDate = (String) variables.getOrDefault("deliveryDate", "A definir");
+            String deliveryDate = (String) variables.getOrDefault("orderDate", "A definir");
             String orderId = (String) variables.getOrDefault("orderId", (String) variables.getOrDefault("correlationKey", "N/A"));
 
             //Montar o Email
-            String assunto = "Previsão de Entrega - Pedido " + orderId;
+            String assunto = "Previsão de Entrega - Pedido";
 
             String corpo = String.format(
-                    "Olá %s,\n\n" +
-                            "Temos o prazer de informar que o seu pedido (%s) foi processado.\n\n" +
+                    "Olá,\n\n" +
+                            "Temos o prazer de informar que o seu pedido foi processado.\n\n" +
                             "Data Estimada de Entrega: %s\n\n" +
                             "Caso esta data não seja conveniente, por favor entre em contacto connosco.\n\n" +
                             "Obrigado pela preferência,\n" +
                             "Equipa de Produção",
-                    clientName, orderId, deliveryDate
+                    deliveryDate
             );
+
+            if(clientEmail == null) {
+                clientEmail = "8230138@estg.ipp.pt";
+            }
 
             SendEmailUtils.sendEmail(clientEmail, assunto, corpo);
 

@@ -52,17 +52,27 @@ public class RegisterOrderHandle implements JobHandler {
             Map<String, Object> variables = job.getVariablesAsMap();
 
             //LER DADOS DO FORMULÁRIO
-            String cName = (String) variables.get("clientName");
+            String cName = (String) variables.getOrDefault("clienteName", variables.get("clientName"));
             String cEmail = (String) variables.get("clientEmail");
             String pTypeStr = (String) variables.get("pizzaType");
 
             Number qtyNum = (Number) variables.get("quantity");
             int quantity = (qtyNum != null) ? qtyNum.intValue() : 1;
 
+            String dateStr = (String) variables.get("orderDate");
+
             if (cName == null || pTypeStr == null) {
                 System.out.println("   [!] Aviso: Campos vazios. A usar valores de teste.");
                 cName = (cName == null) ? "Cliente Balcão" : cName;
                 pTypeStr = (pTypeStr == null) ? "PEPPERONI" : pTypeStr;
+            }
+
+            String dateToUse;
+            if (dateStr != null && !dateStr.isEmpty()) {
+                dateToUse = dateStr;
+            } else {
+                dateToUse = LocalDate.now().toString();
+                System.out.println("   [!] Data não fornecida. A usar data de hoje: " + dateToUse);
             }
 
             //CRIAR OBJETOS JAVA
@@ -82,7 +92,7 @@ public class RegisterOrderHandle implements JobHandler {
             String orderId = "ORD-" + UUID.randomUUID().toString().substring(0, 8);
             Order order = new Order(
                     orderId,
-                    LocalDate.now().toString(),
+                    dateToUse,
                     "PENDING",
                     cliente,
                     item
