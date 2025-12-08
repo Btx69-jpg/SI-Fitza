@@ -14,51 +14,51 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class GetProductOrderDetailsHandle implements JobHandler {
+public class RegisterOrderHandle implements JobHandler {
 
     @Override
     public void handle(JobClient client, ActivatedJob job) throws Exception {
-        System.out.println("\n>>> [TASK: REGISTO ENCOMENDA] A processar dados do formulário...");
+        System.out.println("\n>>> [TASK: SOLICITAR ENCOMENDAS] A processar dados do formulário...");
 
         try {
             Map<String, Object> variables = job.getVariablesAsMap();
 
-            // 1. Ler as variáveis INDIVIDUAIS que vêm do Formulário
-            // Nota: Os nomes aqui ("clientName", "pizzaType"...) têm de ser iguais aos 'Keys' do formulário
-            String cName = (String) variables.get("clientName");
-            String cEmail = (String) variables.get("clientEmail");
-            String pTypeStr = (String) variables.get("pizzaType");
+            // 1. LER DADOS DO FORMULÁRIO
+            // IMPORTANTE: As 'Keys' no formulário do Camunda têm de ser iguais a estes nomes:
+            String cName = (String) variables.get("clientName");   // Key: clientName
+            String cEmail = (String) variables.get("clientEmail"); // Key: clientEmail
+            String pTypeStr = (String) variables.get("pizzaType"); // Key: pizzaType
 
-            // O Camunda pode enviar números como Integer ou Double, por isso usamos Number para ser seguro
-            Number qtyNum = (Number) variables.get("quantity");
+            // O Camunda pode enviar números como Integer ou Double
+            Number qtyNum = (Number) variables.get("quantity");    // Key: quantity
             int quantity = (qtyNum != null) ? qtyNum.intValue() : 1;
 
-            // Validação simples (para evitar erros se o form vier vazio)
+            // Validação de segurança (caso venha vazio)
             if (cName == null || pTypeStr == null) {
-                System.out.println("   [!] Aviso: Dados incompletos no formulário. A usar valores de teste.");
-                cName = (cName == null) ? "Cliente Teste" : cName;
+                System.out.println("   [!] Aviso: Campos vazios. A usar valores de teste.");
+                cName = (cName == null) ? "Cliente Balcão" : cName;
                 pTypeStr = (pTypeStr == null) ? "PEPPERONI" : pTypeStr;
             }
 
-            // 2. Criar os Objetos Java
+            // 2. CRIAR OBJETOS JAVA
             // Criar Cliente
             String clientId = "CLI-" + UUID.randomUUID().toString().substring(0, 5);
             Cliente cliente = new Cliente(clientId, cName);
             cliente.setMail(cEmail);
 
-            // Converter String do formulário para o Enum TypePizza
+            // Determinar Tipo de Pizza
             TypePizza typePizza;
             try {
                 typePizza = TypePizza.valueOf(pTypeStr);
             } catch (IllegalArgumentException e) {
-                System.out.println("   [!] Tipo de pizza desconhecido: " + pTypeStr + ". A assumir PEPPERONI.");
+                System.out.println("   [!] Tipo desconhecido: " + pTypeStr + ". A assumir PEPPERONI.");
                 typePizza = TypePizza.PEPPERONI;
             }
 
-            // Criar a descrição do item
+            // Criar Item do Pedido
             OrderDescription item = new OrderDescription(typePizza, quantity);
 
-            // Criar a Encomenda (Order) completa
+            // Criar a Encomenda Completa
             String orderId = "ORD-" + UUID.randomUUID().toString().substring(0, 8);
             Order order = new Order(
                     orderId,
@@ -68,36 +68,32 @@ public class GetProductOrderDetailsHandle implements JobHandler {
                     item
             );
 
-            System.out.println("   > Encomenda Gerada: " + orderId);
-            System.out.println("   > Cliente: " + cName + " (" + cEmail + ")");
+            System.out.println("   > ID Gerado: " + orderId);
+            System.out.println("   > Cliente: " + cName);
             System.out.println("   > Pedido: " + quantity + "x " + typePizza);
 
-            // 3. Preparar as variáveis de saída
+            // 3. PREPARAR SAÍDA
             Map<String, Object> output = new HashMap<>();
 
-            // AQUI ESTÁ O TRUQUE: Guardamos o objeto 'order' na variável 'orderData'
-            // Assim, o resto dos workers (que esperam 'orderData') vão funcionar sem problemas.
+            // Guardamos o objeto completo em 'orderData' para as próximas tarefas usarem
             output.put("orderData", order);
-
-            // Também enviamos o ID solto, dá jeito para emails e pesquisas
+            // Enviamos também o ID solto
             output.put("orderId", orderId);
 
-            // 4. Completar a tarefa
             client.newCompleteCommand(job.getKey())
                     .variables(output)
                     .send()
                     .join();
 
-            System.out.println(">>> Dados processados e convertidos com sucesso.");
+            System.out.println(">>> Encomenda registada com sucesso.");
 
         } catch (Exception e) {
             e.printStackTrace();
             client.newFailCommand(job.getKey())
                     .retries(0)
-                    .errorMessage("Erro ao processar formulário: " + e.getMessage())
+                    .errorMessage("Erro ao ler formulário: " + e.getMessage())
                     .send()
                     .join();
         }
     }
 }
-
