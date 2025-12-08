@@ -46,7 +46,7 @@ public class WorkerProgramarProducao {
 
             // Alternativa 3b: Enviar Email ao Fornecedor (Caso falte stock)
             client.newWorker()
-                    .jobType("email_fornecedor")
+                    .jobType("emitir_reposicao")
                     .handler(new SendPurchaseOrderMailHandle())
                     .name("emailSupplierWorker")
                     .timeout(10000)
@@ -56,7 +56,7 @@ public class WorkerProgramarProducao {
 
             // Passo 4: Verificar Estado das Máquinas
             client.newWorker()
-                    .jobType("check_machines")
+                    .jobType("verificar_equipamentos")
                     .handler(new CheckMachineStatusHandle())
                     .name("machineWorker")
                     .timeout(10000)
@@ -65,7 +65,7 @@ public class WorkerProgramarProducao {
 
             // Alternativa 4b: Enviar Email à Manutenção (Caso haja avaria)
             client.newWorker()
-                    .jobType("email_manutencao")
+                    .jobType("contactar_manutencao")
                     .handler(new ContactMaintenanceEmailHandle())
                     .name("emailMaintWorker")
                     .timeout(10000)
@@ -83,7 +83,7 @@ public class WorkerProgramarProducao {
 
             // Passo 6: Registar Ordem de Produção
             client.newWorker()
-                    .jobType("registar_ordem")
+                    .jobType("registo_encomenda")
                     .handler(new RegisterOrderHandle())
                     .name("autoRegisterWorker")
                     .timeout(10000)
