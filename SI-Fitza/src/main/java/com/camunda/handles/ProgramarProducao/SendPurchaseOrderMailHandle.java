@@ -9,33 +9,52 @@ import io.github.cdimascio.dotenv.Dotenv;
 import java.util.Map;
 
 public class SendPurchaseOrderMailHandle implements JobHandler {
+
     private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 
     @Override
     public void handle(JobClient client, ActivatedJob job) {
-        System.out.println("\n>>> [EMAIL] A preparar envio de notificação para o diretor de compras...");
+        System.out.println("\n>>> [EMAIL] A preparar pedido de reposição de stock...");
 
         try {
+            // Obter as variáveis do processo (Assumi que os materiais que faltavam ja foram calculados e guardados)
             Map<String, Object> variables = job.getVariablesAsMap();
 
-            String loteId = (String) variables.getOrDefault("loteId", "DESCONHECIDO");
+            String materialName = (String) variables.getOrDefault("materialName", "Material Não Especificado");
 
-            String destinatario = dotenv.get("EMAIL_DIRETOR_COMPRAS");
-            String assunto = "Envio de pedido de compras para a encomenda nº: " + loteId;
+            Object qtyObj = variables.get("quantityRequired");
+            String quantity = (qtyObj != null) ? qtyObj.toString() : "0";
 
+            String destinatario = dotenv.get("EMAIL_FORNECEDOR");
+
+            String assunto = "Pedido de Reposição: " + materialName;
+
+            // Corpo do email
             String corpo = String.format(
-                    "Bom dia,\n\nPara dar inicio a produção da encomenda mº %s está é necessario os seguintes materiais:\n" +
-                            "Por favor procedam à análise.\n\nCumprimentos,\nProdução",
-                    loteId
+                    "Prezados,\n\n" +
+                            "Solicitamos a reposição urgente do seguinte item de stock:\n\n" +
+                            " - Material: %s\n" +
+                            " - Quantidade Necessária: %s unidades\n\n" +
+                            "Por favor, confirmar data de entrega.\n\n" +
+                            "Atentamente,\n" +
+                            "Gestão de Stock",
+                    materialName, quantity
             );
 
+            // envia o email
             SendEmailUtils.sendEmail(destinatario, assunto, corpo);
+
+            System.out.println(">>> Email de reposição enviado para: " + destinatario);
+
+            client.newCompleteCommand(job.getKey())
+                    .send()
+                    .join();
+
         } catch (Exception e) {
             e.printStackTrace();
-            // Se o email falhar, podes querer tentar de novo ou falhar o job
             client.newFailCommand(job.getKey())
                     .retries(0)
-                    .errorMessage("Falha no envio de email: " + e.getMessage())
+                    .errorMessage("Falha ao enviar email de stock: " + e.getMessage())
                     .send()
                     .join();
         }

@@ -1,10 +1,14 @@
 package com.camunda.academy;
 
+import com.camunda.handles.ProgramarProducao.ContactMaintenanceEmailHandler;
+import com.camunda.handles.ProgramarProducao.NotifyClientDeadlineEmailHandler;
+import com.camunda.handles.ProgramarProducao.SendPurchaseOrderMailHandle;
 import com.camunda.handles.RegistoLote.*;
 import com.camunda.utils.CamundaClientFactory;
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.Topology;
 
+import java.time.Duration;
 import java.util.Scanner;
 
 public class WorkerProgramarProducao {
@@ -14,6 +18,26 @@ public class WorkerProgramarProducao {
             final Topology topology = client.newTopologyRequest().send().join();
             System.out.println("Conexão com sucesso! Cluster size: " + topology.getClusterSize());
 
+            //VERIFICAR O JOBTYPE ACHO Q TA MAL
+            client.newWorker()
+                    .jobType("calculate_materials_needs")
+                    .handler(new SendPurchaseOrderMailHandle())
+                    .timeout(Duration.ofSeconds(30))
+                    .open();
+
+            //VERIFICAR O JOBTYPE ACHO Q TA MAL!
+            client.newWorker()
+                    .jobType("contactar-manutencao")
+                    .handler(new ContactMaintenanceEmailHandler())
+                    .timeout(Duration.ofSeconds(30))
+                    .open();
+
+            //VERIFICAR O JOBTYPE ACHO Q TA MAL!
+            client.newWorker()
+                    .jobType("notificar-cliente-prazo") // Nome para usar no BPMN
+                    .handler(new NotifyClientDeadlineEmailHandler())
+                    .timeout(Duration.ofSeconds(30))
+                    .open();
             /*
             client.newWorker()
                     .jobType("createLote")

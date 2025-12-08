@@ -2,7 +2,7 @@ package com.camunda.classes.ProgramarProducao;
 
 import com.camunda.classes.RawMaterial;
 
-public class MaterialNeeded {
+    public class MaterialNeeded {
     private RawMaterial rawMaterial;
     private int quantity;
 
