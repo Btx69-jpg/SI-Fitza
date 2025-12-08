@@ -29,8 +29,8 @@ public class ClientOrderSendSimulation {
             String mailCliente = scanner.nextLine();
 
             String clienteId = "CLI-" + UUID.randomUUID().toString().substring(0, 8);
-            String orderId = "ORD-" + UUID.randomUUID().toString().substring(0, 8);
-
+            //String orderId = "ORD-" + UUID.randomUUID().toString().substring(0, 8);
+            String orderId = "ORD-12345";
             System.out.println("\nEscolha a Pizza:");
             System.out.println("1 - Quatro Queijos");
             System.out.println("2 - Vegetariana");
@@ -68,22 +68,20 @@ public class ClientOrderSendSimulation {
 
             Map<String, Object> variables = new HashMap<>();
 
+            variables.put("orderId", orderId);
             variables.put("orderData", orderObj);
-
             variables.put("orderTotalQuantity", quantidade);
 
             System.out.println("\nA enviar pedido " + orderId + " para o sistema...");
 
-
             client.newPublishMessageCommand()
-                    .messageName("encomenda_cliente")
+                    .messageName("orderRequest")
                     .correlationKey(orderId)
                     .variables(variables)
                     .send()
                     .join();
 
             System.out.println(">>> Sucesso! Pedido enviado para a fábrica.");
-
         } catch (Exception e) {
             System.err.println("Erro ao enviar pedido: " + e.getMessage());
             e.printStackTrace();

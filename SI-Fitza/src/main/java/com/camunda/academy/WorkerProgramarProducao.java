@@ -16,89 +16,7 @@ public class WorkerProgramarProducao {
 
             System.out.println(">>> A REGISTAR WORKERS DO PROCESSO DE PRODUÇÃO...");
 
-
-            // Passo 1: Receber e Validar a Encomenda
-            client.newWorker()
-                    .jobType("solicitar_encomendas")
-                    .handler(new GetProductOrderDetailsHandle())
-                    .name("orderWorker")
-                    .timeout(10000)
-                    .open();
-            System.out.println("   [1] Worker 'solicitar_encomendas' (Validar Pedido) -> ATIVO");
-
-            // Passo 2: Calcular Materiais (Ficha Técnica)
-            client.newWorker()
-                    .jobType("calculate_materials_needs")
-                    .handler(new CalculateRawMaterialNeedsHandle())
-                    .name("technicalWorker")
-                    .timeout(10000)
-                    .open();
-            System.out.println("   [2] Worker 'calculate_materials_needs' (Ficha Técnica) -> ATIVO");
-
-            // Passo 3: Verificar Stock
-            client.newWorker()
-                    .jobType("verificar_stock")
-                    .handler(new CheckStockHandle())
-                    .name("stockWorker")
-                    .timeout(10000)
-                    .open();
-            System.out.println("   [3] Worker 'verificar_stock' (Armazém) -> ATIVO");
-
-            // Alternativa 3b: Enviar Email ao Fornecedor (Caso falte stock)
-            client.newWorker()
-                    .jobType("emitir_reposicao")
-                    .handler(new SendPurchaseOrderMailHandle())
-                    .name("emailSupplierWorker")
-                    .timeout(10000)
-                    .open();
-            System.out.println("   [3b] Worker 'email_fornecedor' (Reposição) -> ATIVO");
-
-
-            // Passo 4: Verificar Estado das Máquinas
-            client.newWorker()
-                    .jobType("verificar_equipamentos")
-                    .handler(new CheckMachineStatusHandle())
-                    .name("machineWorker")
-                    .timeout(10000)
-                    .open();
-            System.out.println("   [4] Worker 'check_machines' (Manutenção) -> ATIVO");
-
-            // Alternativa 4b: Enviar Email à Manutenção (Caso haja avaria)
-            client.newWorker()
-                    .jobType("contactar_manutencao")
-                    .handler(new ContactMaintenanceEmailHandle())
-                    .name("emailMaintWorker")
-                    .timeout(10000)
-                    .open();
-            System.out.println("   [4b] Worker 'email_manutencao' (Alerta) -> ATIVO");
-
-            // Passo 5: Estimar Prazo de Entrega
-            client.newWorker()
-                    .jobType("estimar_prazo")
-                    .handler(new CalculateDeliveryDateHandle())
-                    .name("deliveryWorker")
-                    .timeout(10000)
-                    .open();
-            System.out.println("   [5] Worker 'estimar_prazo' (Cálculo Data) -> ATIVO");
-
-            // Passo 6: Registar Ordem de Produção
-            client.newWorker()
-                    .jobType("registo_encomenda")
-                    .handler(new RegisterOrderHandle())
-                    .name("autoRegisterWorker")
-                    .timeout(10000)
-                    .open();
-            System.out.println("   [6] Worker 'registar_ordem' (Base de Dados) -> ATIVO");
-
-            // Passo 7: Notificar Cliente
-            client.newWorker()
-                    .jobType("notificar_cliente")
-                    .handler(new NotifyClientDeadlineEmailHandle())
-                    .name("emailClientWorker")
-                    .timeout(10000)
-                    .open();
-            System.out.println("   [7] Worker 'notificar_cliente' (Confirmação) -> ATIVO");
-
+            registerWorkers(client);
 
             System.out.println("\n>>> SISTEMA PRONTO! TODOS OS WORKERS ESTÃO À ESCUTA.");
             System.out.println("    (Podes iniciar o processo no Tasklist agora)");
@@ -112,5 +30,86 @@ public class WorkerProgramarProducao {
             System.err.println("Ocorreu um erro: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private static void registerWorkers(ZeebeClient client) {
+        // [1] Validar a Encomenda
+        client.newWorker()
+                .jobType("requestOrders")
+                .handler(new GetProductOrderDetailsHandle())
+                .name("requestOrdersWorker")
+                .timeout(10000).open();
+        System.out.println("[1] Worker 'requestOrders' -> ATIVO");
+
+        // [2] Obter Ficha Técnica (Cálculo de Necessidades)
+        client.newWorker()
+                .jobType("obtainTechnicalDataSheets") // Verifica se no BPMN está este nome!
+                .handler(new CalculateRawMaterialNeedsHandle())
+                .name("obtainTechnicalDataSheetsWorker")
+                .timeout(10000).open();
+        System.out.println("[2] Worker 'obtainTechnicalDataSheets' -> ATIVO");
+
+        // [3] Verificar Stock
+        client.newWorker()
+                .jobType("checkStockLevels")
+                .handler(new CheckStockHandle())
+                .name("checkStockLevelsWorker")
+                .timeout(10000).open();
+        System.out.println("[3] Worker 'checkStockLevels' -> ATIVO");
+
+        client.newWorker()
+                .jobType("calculateMaterialsNeeds")
+                .handler(new CalculateRawMaterialNeedsHandle())
+                .name("calculateMaterialsNeedsWorker")
+                .timeout(10000).open();
+        System.out.println("[3] Worker 'calculateMaterialsNeeds' -> ATIVO");
+
+        // [3b] Enviar Email Fornecedor (Reposição)
+        client.newWorker()
+                .jobType("issueReplacement")
+                .handler(new SendPurchaseOrderMailHandle())
+                .name("issueReplacementWorker")
+                .timeout(10000).open();
+        System.out.println("[3b] Worker 'issueReplacement' -> ATIVO");
+
+        // [4] Verificar Máquinas
+        client.newWorker()
+                .jobType("checkEquipment")
+                .handler(new CheckMachineStatusHandle())
+                .name("checkEquipmentWorker")
+                .timeout(10000).open();
+        System.out.println("[4] Worker 'checkEquipment' -> ATIVO");
+
+        // [4b] Contactar Manutenção
+        client.newWorker()
+                .jobType("contactMaintenance")
+                .handler(new ContactMaintenanceEmailHandle())
+                .name("contactMaintenanceWorker")
+                .timeout(10000).open();
+        System.out.println("[4b] Worker 'contactMaintenance' -> ATIVO");
+
+        // [5] Estimar Prazo
+        client.newWorker()
+                .jobType("estimateDelivery")
+                .handler(new CalculateDeliveryDateHandle())
+                .name("deliveryWorker")
+                .timeout(10000).open();
+        System.out.println("[5] Worker 'estimateDelivery' -> ATIVO");
+
+        // [6] Registar Ordem
+        client.newWorker()
+                .jobType("registerOrder")
+                .handler(new RegisterOrderHandle())
+                .name("registerOrderWorker") // Corrigi o nome aqui (estava copiado do delivery)
+                .timeout(10000).open();
+        System.out.println("[6] Worker 'registerOrder' -> ATIVO");
+
+        // [7] Notificar Cliente
+        client.newWorker()
+                .jobType("notifyClient")
+                .handler(new NotifyClientDeadlineEmailHandle())
+                .name("notifyClientWorker")
+                .timeout(10000).open();
+        System.out.println("[7] Worker 'notifyClient' -> ATIVO");
     }
 }

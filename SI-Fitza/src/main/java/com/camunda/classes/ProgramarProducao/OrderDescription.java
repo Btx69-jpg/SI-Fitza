@@ -6,6 +6,7 @@ public class OrderDescription {
     private TypePizza typePizza;
     private int quantity;
 
+    public OrderDescription() {}
     public OrderDescription(TypePizza typePizza, int quantity) {
         this.typePizza = typePizza;
         this.quantity = quantity;

@@ -8,6 +8,8 @@ public class ProductTechnicalSheet {
     private String productDescription;
     private MaterialNeeded[] materialNeeded;
 
+    public ProductTechnicalSheet() {}
+
     public ProductTechnicalSheet(TypePizza productType, String productDescription, MaterialNeeded[] materialNeeded) {
         this.productType = productType;
         this.productDescription = productDescription;

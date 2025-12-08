@@ -38,7 +38,7 @@ public class Lote {
     private TypePizza typePizza;
 
     /** Quantidade total produzida neste lote (em unidades ou Kg). */
-    private float producedQuantity;
+    private int producedQuantity;
 
     /**
      * Indica se este lote foi produzido para uma encomenda específica (true) ou para stock (false).
@@ -85,7 +85,7 @@ public class Lote {
      * @param producedQuantity Quantidade planeada/produzida.
      * @param cliente Cliente associado (pode ser null se for stock).
      */
-    public Lote(String loteId, TypePizza typePizza, boolean isOrder, float producedQuantity, Cliente cliente) {
+    public Lote(String loteId, TypePizza typePizza, boolean isOrder, int producedQuantity, Cliente cliente) {
         this.loteId = loteId;
         this.loteState = new StateLote(LoteState.BLOCKED);
         this.typePizza = typePizza;
@@ -163,9 +163,9 @@ public class Lote {
 
     /**
      * Obtém a quantidade total produzida.
-     * @return A quantidade produzida (float).
+     * @return A quantidade produzida (int).
      */
-    public float getProducedQuantity() { return producedQuantity; }
+    public int getProducedQuantity() { return producedQuantity; }
 
     /**
      * Verifica se o lote é uma encomenda.

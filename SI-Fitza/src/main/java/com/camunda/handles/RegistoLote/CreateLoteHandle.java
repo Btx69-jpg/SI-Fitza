@@ -62,7 +62,7 @@ public class CreateLoteHandle implements JobHandler {
 
             //Converter Number para float
             Number qtyInput = (Number) variables.get("producedQuantity");
-            float producedQuantity = (qtyInput != null) ? qtyInput.floatValue() : 0.0f;
+            int producedQuantity = (qtyInput != null) ? qtyInput.intValue() : 0;
 
             Boolean isOrder = (Boolean) variables.get("isOrder");
             Cliente clienteObj = null;

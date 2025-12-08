@@ -1,0 +1,19 @@
+{
+    "loteId":"LOTE1A",
+    "loteState":
+    {
+        "state":"DISCARDED",
+        "discartReasons":
+        [
+            {
+                "actor":"LABORATORY",
+                "reason":"Arroz estragado"
+            },
+            {
+                "actor":"QUALITY_CONTROL",
+                "reason":"Arroz com data de validade próxima de vencimento"
+            }
+        ]
+    },
+    "typePizza":"VEGETARIAN",
+    "producedQuantity":2,"cliente":null,"machineReadings":[{"machineType":"mixer","machineId":"MIX-01","machineName":"Misturadora Principal","status":"STOPPED","readAt":"2025-12-08T18:31:44.9405209","rpm":115.07895731948261,"doughTemp":23.704654826155938,"motorAmps":14.5},{"machineType":"oven","machineId":"OVN-Tunnel-A","machineName":"Forno de Cozedura","status":"STOPPED","readAt":"2025-12-08T18:31:44.9418366","temperatureZone1":280.8673002521419,"temperatureZone2":302.126548788355,"beltSpeed":45.0,"avgTemp":291.49692452024846}],"roomSensors":[{"sensorType":"temperature","sensorId":"SENS-TEMP-01","location":"Sala de Fermentação A","readAt":"2025-12-08T18:31:45.3394708","temperatureCelsius":21.14828148288332},{"sensorType":"humidity","sensorId":"SENS-HUM-02","location":"Sala de Fermentação A","readAt":"2025-12-08T18:31:45.3394708","humidityPercentage":51.04469036600719},{"sensorType":"airQuality","sensorId":"SENS-AIR-01","location":"Geral Fábrica","readAt":"2025-12-08T18:31:45.3394708","particulateMatterLevel":36.61501368999008}],"rawMaterialUsed":[{"rawMaterial":{"rawMaterialId":"MAT1","supplier":{"supplierId":"FORN1","supplierName":"Fornecedor XPTO"},"materialName":"Farinha"},"expirationDate":"30-12-2025","quantity":0.1},{"rawMaterial":{"rawMaterialId":"MAT2","supplier":{"supplierId":"FORN1","supplierName":"Fornecedor XPTO"},"materialName":"Arroz"},"expirationDate":"08-12-2025","quantity":0.1}],"order":false}

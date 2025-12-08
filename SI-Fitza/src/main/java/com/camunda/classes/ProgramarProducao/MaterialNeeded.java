@@ -6,6 +6,8 @@ import com.camunda.classes.RawMaterial;
     private RawMaterial rawMaterial;
     private int quantity;
 
+    public MaterialNeeded() {}
+
     public MaterialNeeded(RawMaterial rawMaterial, int quantity) {
         this.rawMaterial = rawMaterial;
         this.quantity = quantity;

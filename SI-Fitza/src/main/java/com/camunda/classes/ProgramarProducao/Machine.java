@@ -6,6 +6,8 @@ public class Machine {
     private boolean isWorking; // true = OK, false = Avariada
     private String statusDescription;
 
+    public Machine() {}
+
     public Machine(String id, String name) {
         this.id = id;
         this.name = name;
